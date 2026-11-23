@@ -1,9 +1,9 @@
 # Agent entry point — مقطوب
 
-These instructions apply to the entire repository. Read `PROJECT_GUIDE.md` before planning or editing.
+These instructions apply to the entire repository. Read [RULES.md](RULES.md) and `PROJECT_GUIDE.md` before planning or editing. `RULES.md` is the shared working-rules reference; this file is its short entry point.
 
 ## Start each task
-- Read this file, `PROJECT_GUIDE.md`, `README.md`, then any applicable nested instructions.
+- Read this file, `RULES.md`, `PROJECT_GUIDE.md`, `README.md`, then any applicable nested instructions.
 - For data, storage, keys, migrations or releases, read `docs/operations/BACKUP_AND_RECOVERY.md`; its targets are proposals until approved and measured.
 - Inspect Git status and the actual files; preserve other people's uncommitted changes.
 - Treat the guide's current-state section as a dated baseline, not proof that code exists today.
