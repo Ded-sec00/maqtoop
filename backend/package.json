@@ -1,0 +1,8 @@
+{
+  "name": "maqtoop-first-purchase-api",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "scripts": { "start": "node start.mjs" },
+  "dependencies": { "pg": "8.16.3" }
+}

@@ -1,0 +1,2644 @@
+{
+  "startedAt": "2026-11-26T15:05:01.760Z",
+  "clusterDirectory": "C:\\Users\\albna\\AppData\\Local\\Temp\\maqtoop-test-suite-b0pX9I",
+  "results": [
+    {
+      "name": "http-purchase",
+      "passed": true,
+      "evidence": [
+        {
+          "http": "passed",
+          "resolutionRaces": [
+            {
+              "winner": "refund",
+              "observedBlocking": true,
+              "winnerStatus": 202,
+              "loserStatus": 409
+            },
+            {
+              "winner": "replacement",
+              "observedBlocking": true,
+              "winnerStatus": 200,
+              "loserStatus": 409
+            }
+          ],
+          "postgres": "16.16",
+          "realHttp": true,
+          "twoDevicesSameIntent": "eac2de1b-cd73-4c5c-94a8-b4e89b628fa5",
+          "observedPaymentBlocking": true,
+          "paymentRecords": 1,
+          "providerChargesForPurchase": 1,
+          "merchantPayable": 48600,
+          "lateRefund": 54000,
+          "replacementApplied": 54000,
+          "reconciliation": "passed",
+          "lostReplies": [
+            "before-commit",
+            "after-commit"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "review-regressions",
+      "passed": true,
+      "evidence": [
+        {
+          "regressions": [
+            "expired-reservation",
+            "multiple-receipts",
+            "ledger-enforcement"
+          ],
+          "firstPayable": 48600,
+          "secondReceiptRefunded": 54000,
+          "thirdReceipt": 123.45,
+          "encoding": "UTF8",
+          "postgres": "16.16"
+        }
+      ]
+    },
+    {
+      "name": "restricted-access",
+      "passed": true,
+      "evidence": [
+        {
+          "security": "passed",
+          "postgres": "16.16",
+          "realLoginConnections": 7,
+          "restrictedEndToEnd": true
+        }
+      ]
+    },
+    {
+      "name": "last-handset-race",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "database": "maqtoop_test_3",
+          "winnerPid": 23892,
+          "loserPid": 23444,
+          "observedBlocking": true,
+          "orders": 1,
+          "onHand": 0,
+          "payable": 48600,
+          "commission": 5400,
+          "balancedJournals": 2
+        }
+      ]
+    },
+    {
+      "name": "refund",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "requestCount": 3,
+          "confirmationCount": 3,
+          "refundPosted": 54000,
+          "firstPayment2113Balance": 0,
+          "secondOrderPayableBeforeAndAfter": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "replacementRequests": 3,
+          "replacementOrder": 200,
+          "newPayments": 0,
+          "allocatedFrom2113": 54000,
+          "secondOrderPayableBeforeAndAfter": 48600,
+          "replacementMerchantPayable": 49680
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-first",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-first",
+          "blocked": true,
+          "holderPid": 20104,
+          "contenderPid": 24312,
+          "failureCode": "P0001",
+          "resolution": "refund",
+          "outcome": {
+            "refunds": 1,
+            "replacements": 0,
+            "alternative_orders": 0,
+            "allocated": 0
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-first",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-first",
+          "blocked": true,
+          "holderPid": 19520,
+          "contenderPid": 3092,
+          "failureCode": "P0001",
+          "resolution": "replacement",
+          "outcome": {
+            "refunds": 0,
+            "replacements": 1,
+            "alternative_orders": 1,
+            "allocated": 1
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-rollback",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-rollback",
+          "blocked": true,
+          "holderPid": 22256,
+          "contenderPid": 22780,
+          "failureCode": "22012",
+          "resolution": "replacement",
+          "outcome": {
+            "refunds": 0,
+            "replacements": 1,
+            "alternative_orders": 1,
+            "allocated": 1
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-rollback",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-rollback",
+          "blocked": true,
+          "holderPid": 23740,
+          "contenderPid": 416,
+          "failureCode": "22012",
+          "resolution": "refund",
+          "outcome": {
+            "refunds": 1,
+            "replacements": 0,
+            "alternative_orders": 0,
+            "allocated": 0
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-drop-before",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-drop-before",
+          "blocked": true,
+          "holderPid": 20724,
+          "contenderPid": 4792,
+          "resolution": "replacement",
+          "outcome": {
+            "refunds": 0,
+            "replacements": 1,
+            "alternative_orders": 1,
+            "allocated": 1
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-drop-before",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-drop-before",
+          "blocked": true,
+          "holderPid": 23856,
+          "contenderPid": 18876,
+          "resolution": "refund",
+          "outcome": {
+            "refunds": 1,
+            "replacements": 0,
+            "alternative_orders": 0,
+            "allocated": 0
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-drop-after",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-drop-after",
+          "blocked": true,
+          "holderPid": 7048,
+          "contenderPid": 16084,
+          "failureCode": "P0001",
+          "resolution": "refund",
+          "outcome": {
+            "refunds": 1,
+            "replacements": 0,
+            "alternative_orders": 0,
+            "allocated": 0
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-drop-after",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-drop-after",
+          "blocked": true,
+          "holderPid": 10360,
+          "contenderPid": 19880,
+          "failureCode": "P0001",
+          "resolution": "replacement",
+          "outcome": {
+            "refunds": 0,
+            "replacements": 1,
+            "alternative_orders": 1,
+            "allocated": 1
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-waiter-before",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-waiter-before",
+          "blocked": true,
+          "holderPid": 15440,
+          "contenderPid": 18668,
+          "retryPid": 15032,
+          "failureCode": "P0001",
+          "resolution": "refund",
+          "outcome": {
+            "refunds": 1,
+            "replacements": 0,
+            "alternative_orders": 0,
+            "allocated": 0
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-waiter-before",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-waiter-before",
+          "blocked": true,
+          "holderPid": 22924,
+          "contenderPid": 19588,
+          "retryPid": 8836,
+          "failureCode": "P0001",
+          "resolution": "replacement",
+          "outcome": {
+            "refunds": 0,
+            "replacements": 1,
+            "alternative_orders": 1,
+            "allocated": 1
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-waiter-after",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-waiter-after",
+          "blocked": true,
+          "holderPid": 5352,
+          "contenderPid": 7896,
+          "retryPid": 23540,
+          "failureCode": "P0001",
+          "resolution": "refund",
+          "outcome": {
+            "refunds": 1,
+            "replacements": 0,
+            "alternative_orders": 0,
+            "allocated": 0
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-waiter-after",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-waiter-after",
+          "blocked": true,
+          "holderPid": 12264,
+          "contenderPid": 23996,
+          "retryPid": 12396,
+          "failureCode": "P0001",
+          "resolution": "replacement",
+          "outcome": {
+            "refunds": 0,
+            "replacements": 1,
+            "alternative_orders": 1,
+            "allocated": 1
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-waiter-fail-before",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-waiter-fail-before",
+          "blocked": true,
+          "holderPid": 23708,
+          "contenderPid": 12676,
+          "retryPid": 6308,
+          "failureCode": "22012",
+          "resolution": "replacement",
+          "outcome": {
+            "refunds": 0,
+            "replacements": 1,
+            "alternative_orders": 1,
+            "allocated": 1
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-waiter-fail-before",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-waiter-fail-before",
+          "blocked": true,
+          "holderPid": 10432,
+          "contenderPid": 14532,
+          "retryPid": 14676,
+          "failureCode": "22012",
+          "resolution": "refund",
+          "outcome": {
+            "refunds": 1,
+            "replacements": 0,
+            "alternative_orders": 0,
+            "allocated": 0
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-waiter-fail-after",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-waiter-fail-after",
+          "blocked": true,
+          "holderPid": 10124,
+          "contenderPid": 22620,
+          "retryPid": 21896,
+          "failureCode": "22012",
+          "resolution": "replacement",
+          "outcome": {
+            "refunds": 0,
+            "replacements": 1,
+            "alternative_orders": 1,
+            "allocated": 1
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-waiter-fail-after",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-waiter-fail-after",
+          "blocked": true,
+          "holderPid": 5856,
+          "contenderPid": 20736,
+          "retryPid": 12360,
+          "failureCode": "22012",
+          "resolution": "refund",
+          "outcome": {
+            "refunds": 1,
+            "replacements": 0,
+            "alternative_orders": 0,
+            "allocated": 0
+          },
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "otherPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": false,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 11008,
+          "retryPid": 9852,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": false,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 15176,
+          "retryPid": 12736,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-retry-before-commit",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-retry-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": false,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 11880,
+          "retryPid": 5996,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-retry-before-commit",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-retry-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": false,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 1996,
+          "retryPid": 12732,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-lost-reply",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-lost-reply",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": false,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": true,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 23668,
+          "retryPid": 14760,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-lost-reply",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-lost-reply",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": false,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": true,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 24152,
+          "retryPid": 13128,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit/TWO_DEVICES=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": false,
+          "twoDevices": true,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 12748,
+          "retryPid": 24120,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit/TWO_DEVICES=1,DROP_BOTH=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": true,
+          "twoDevices": true,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 4732,
+          "retryPid": 24168,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit/TWO_DEVICES=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": false,
+          "twoDevices": true,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 12296,
+          "retryPid": 24132,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit/TWO_DEVICES=1,DROP_BOTH=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": true,
+          "twoDevices": true,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 2624,
+          "retryPid": 18688,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-lost-reply/TWO_DEVICES=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-lost-reply",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": false,
+          "twoDevices": true,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": true,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 23956,
+          "retryPid": 13700,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-lost-reply/TWO_DEVICES=1,DROP_BOTH=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-lost-reply",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": true,
+          "twoDevices": true,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": true,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 18504,
+          "retryPid": 20260,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-lost-reply/TWO_DEVICES=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-lost-reply",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": false,
+          "twoDevices": true,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": true,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 15080,
+          "retryPid": 4852,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-lost-reply/TWO_DEVICES=1,DROP_BOTH=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-lost-reply",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "bothDisconnected": true,
+          "twoDevices": true,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": true,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 24128,
+          "retryPid": 21464,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit/DROP_BOTH=1,RETRY_WINNER_LOSS=before",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "retryLoss": "before",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 11008,
+          "retryPid": 23240,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit/DROP_BOTH=1,DROP_BOTH_AGAIN=1,RETRY_WINNER_LOSS=before",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": true,
+          "holderFailed": false,
+          "retryLoss": "before",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 14352,
+          "retryPid": 19368,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit/DROP_BOTH=1,DROP_BOTH_AGAIN=1,RETRY_WINNER_LOSS=before,THIRD_WINNER_LOSS=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": true,
+          "bothDisconnectedAgain": true,
+          "holderFailed": false,
+          "retryLoss": "before",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 17140,
+          "retryPid": 11172,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit/DROP_BOTH=1,RETRY_WAITER_LOSS=before",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "waiterLoss": "before",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 6032,
+          "retryPid": 21312,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit/DROP_BOTH=1,RETRY_WAITER_LOSS=before,RETRY_HOLDER_FAIL=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": true,
+          "waiterLoss": "before",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 5352,
+          "retryPid": 17544,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit/DROP_BOTH=1,RETRY_WINNER_LOSS=after",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "retryLoss": "after",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 13664,
+          "retryPid": 23328,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit/DROP_BOTH=1,DROP_BOTH_AGAIN=1,RETRY_WINNER_LOSS=after",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": true,
+          "holderFailed": false,
+          "retryLoss": "after",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 12264,
+          "retryPid": 6828,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit/DROP_BOTH=1,DROP_BOTH_AGAIN=1,RETRY_WINNER_LOSS=after,THIRD_WINNER_LOSS=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": true,
+          "bothDisconnectedAgain": true,
+          "holderFailed": false,
+          "retryLoss": "after",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 22616,
+          "retryPid": 15080,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit/DROP_BOTH=1,RETRY_WAITER_LOSS=after",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "waiterLoss": "after",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 20596,
+          "retryPid": 4092,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "refund-before-commit/DROP_BOTH=1,RETRY_WAITER_LOSS=after,RETRY_HOLDER_FAIL=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "refund-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": true,
+          "waiterLoss": "after",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 16644,
+          "retryPid": 1568,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit/DROP_BOTH=1,RETRY_WINNER_LOSS=before",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "retryLoss": "before",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 2116,
+          "retryPid": 21272,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit/DROP_BOTH=1,DROP_BOTH_AGAIN=1,RETRY_WINNER_LOSS=before",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": true,
+          "holderFailed": false,
+          "retryLoss": "before",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 15088,
+          "retryPid": 10592,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit/DROP_BOTH=1,DROP_BOTH_AGAIN=1,RETRY_WINNER_LOSS=before,THIRD_WINNER_LOSS=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": true,
+          "bothDisconnectedAgain": true,
+          "holderFailed": false,
+          "retryLoss": "before",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 5396,
+          "retryPid": 20988,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit/DROP_BOTH=1,RETRY_WAITER_LOSS=before",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "waiterLoss": "before",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 24528,
+          "retryPid": 22760,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit/DROP_BOTH=1,RETRY_WAITER_LOSS=before,RETRY_HOLDER_FAIL=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": true,
+          "waiterLoss": "before",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 23708,
+          "retryPid": 19496,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit/DROP_BOTH=1,RETRY_WINNER_LOSS=after",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "retryLoss": "after",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 19588,
+          "retryPid": 12320,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit/DROP_BOTH=1,DROP_BOTH_AGAIN=1,RETRY_WINNER_LOSS=after",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": true,
+          "holderFailed": false,
+          "retryLoss": "after",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 20048,
+          "retryPid": 22884,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit/DROP_BOTH=1,DROP_BOTH_AGAIN=1,RETRY_WINNER_LOSS=after,THIRD_WINNER_LOSS=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": true,
+          "bothDisconnectedAgain": true,
+          "holderFailed": false,
+          "retryLoss": "after",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 24232,
+          "retryPid": 24188,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit/DROP_BOTH=1,RETRY_WAITER_LOSS=after",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": false,
+          "waiterLoss": "after",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "replacement",
+          "state": {
+            "refunds": 0,
+            "replacements": 1,
+            "orders": 1,
+            "allocated": 1
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "200",
+          "originalPid": 2624,
+          "retryPid": 22648,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    },
+    {
+      "name": "replacement-before-commit/DROP_BOTH=1,RETRY_WAITER_LOSS=after,RETRY_HOLDER_FAIL=1",
+      "passed": true,
+      "evidence": [
+        {
+          "postgres": "16.16",
+          "soldToSecond": false,
+          "latePaymentEntries": {
+            "clearing": 54000,
+            "pending_sales": -54000
+          },
+          "fulfilledOrder": 100,
+          "payable": 48600,
+          "notificationsSent": 3
+        },
+        {
+          "scenario": "replacement-before-commit",
+          "thirdWinnerLoss": false,
+          "bothDisconnectedAgain": false,
+          "holderFailed": true,
+          "waiterLoss": "after",
+          "bothDisconnected": true,
+          "twoDevices": false,
+          "acceptedDecision": "refund",
+          "state": {
+            "refunds": 1,
+            "replacements": 0,
+            "orders": 0,
+            "allocated": 0
+          },
+          "committedBeforeLoss": false,
+          "originalError": "Connection terminated unexpectedly",
+          "resultOnRetry": "refund:late-200",
+          "originalPid": 24556,
+          "retryPid": 21424,
+          "resolutionAmount": 54000,
+          "remaining2113": 0,
+          "merchantPayable": 48600
+        },
+        {
+          "postgres": "16.16",
+          "soldToSecond": true,
+          "latePaymentEntries": {
+            "2113": -54000,
+            "clearing": 54000
+          },
+          "fulfilledOrder": 201,
+          "payable": 48600,
+          "notificationsSent": 3
+        }
+      ]
+    }
+  ],
+  "finishedAt": "2026-11-26T15:06:03.125Z",
+  "passed": true
+}
