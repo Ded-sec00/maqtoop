@@ -80,18 +80,26 @@ await new Promise(resolve => portServer.close(resolve));
 const clusterDirectory = await mkdtemp(path.join(os.tmpdir(),'maqtoop-test-suite-'));
 const password = randomBytes(32).toString('hex');
 const logs = [];
+const recordLog=message=>{
+  const safe=String(message).split(password).join('[REDACTED]');
+  logs.push(safe);
+  if(process.env.CI) console.log('[postgres] '+safe.trim());
+};
 const postgres = new EmbeddedPostgres({
   databaseDir:path.join(clusterDirectory,'data'), port, user:'maq_test', password,
   initdbFlags:['--encoding=UTF8','--locale=C'],
   postgresFlags:['-c','listen_addresses=127.0.0.1'],
   autoRehydrateSymlinks:true,
-  onLog:message=>logs.push(String(message)),
-  onError:message=>logs.push(String(message)),
+  onLog:recordLog,
+  onError:recordLog,
 });
 const report = { startedAt:new Date().toISOString(), clusterDirectory, expectedCount:cases.length, results:[] };
 try {
+  console.log('Initializing isolated PostgreSQL on '+process.platform+' with '+process.version);
   await postgres.initialise();
+  console.log('Starting isolated PostgreSQL');
   await postgres.start();
+  console.log('PostgreSQL ready; running '+cases.length+' cases');
   for (const [index,test] of cases.entries()) {
     const database = 'maqtoop_test_' + index;
     await postgres.createDatabase(database);
