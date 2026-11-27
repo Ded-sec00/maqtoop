@@ -1,0 +1,17 @@
+---
+description: Project-wide entry point for Maqtoop requirements and shared agent rules
+alwaysApply: true
+---
+
+# Maqtoop project rules
+
+Before planning or editing, read the repository-root files:
+
+- [AGENTS.md](../../AGENTS.md)
+- [RULES.md](../../RULES.md)
+- [PROJECT_GUIDE.md](../../PROJECT_GUIDE.md)
+- [README.md](../../README.md)
+
+For data, storage, secrets, migrations or releases, read [the backup and recovery plan](../../docs/operations/BACKUP_AND_RECOVERY.md).
+
+Inspect actual Git state and applicable nested instructions. The roadmap does not authorize implementation. Use `RULES.md` as the shared working-rules source; do not copy or redefine its rules here. The host's system instructions and the user's authorized scope remain applicable.
