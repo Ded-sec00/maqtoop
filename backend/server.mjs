@@ -1,6 +1,7 @@
 import http from 'node:http';
 import { createHash, createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import pg from 'pg';
+import { createAuth, AuthError } from './auth.mjs';
 
 const { Pool } = pg;
 const maximumBodyBytes = 32768;
@@ -98,6 +99,7 @@ async function readBody(request) {
 }
 
 function publicError(error) {
+  if (error instanceof AuthError) return error;
   if (error instanceof HttpError) return error;
   if (error.code === '28000') return new HttpError(401,'INVALID_SESSION','الجلسة غير صالحة');
   if (error.code === '42501') return new HttpError(403,'ACCESS_DENIED','لا تملك صلاحية تنفيذ العملية');
@@ -112,7 +114,7 @@ function publicError(error) {
     const chosen = codes.find(([pattern])=>pattern.test(error.message));
     return new HttpError(409,chosen?.[1] || 'CONFLICT',chosen?.[2] || 'تعذّر إتمام العملية بحالتها الحالية');
   }
-  if (['22P02','22003','22007','22008'].includes(error.code)) return invalidInput();
+  if (['22P02','22003','22007','22008','22023'].includes(error.code)) return invalidInput();
   if (['ECONNREFUSED','ECONNRESET','ETIMEDOUT','57P01','53300','57014','55P03','40001','40P01'].includes(error.code)) {
     return new HttpError(503,'TEMPORARILY_UNAVAILABLE','الخدمة غير متاحة مؤقتًا، استعلم عن النتيجة ثم أعد نفس الطلب');
   }
@@ -143,6 +145,7 @@ export function createApi(config) {
     if (!pools.has(login)) pools.set(login,createPool(config.actors[login]));
     return pools.get(login);
   };
+  const handleAuth = createAuth({ gateway, actorPool, configuredLogins:Object.keys(config.actors) });
   let timer;
   let worker;
   let closing = false;
@@ -156,6 +159,12 @@ export function createApi(config) {
     try {
       const url = new URL(request.url,'http://localhost');
       if (url.search) throw invalidInput();
+      const authResult = await handleAuth(request,response,{requestId,readBody});
+      if (authResult) {
+        operation = authResult.operation;
+        status = authResult.status;
+        return;
+      }
       const route = routeFor(request.method,url.pathname);
       operation = route.operation;
       const raw = await readBody(request);

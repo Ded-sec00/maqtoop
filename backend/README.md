@@ -33,3 +33,7 @@ npm start --prefix backend
 ترجع next_http_job مهمة action=send أو action=reconcile. بعد قبول إرسال الأمر، تحدد القاعدة موعد مطابقة العملية. يرسل العامل للمطابقة GET إلى operations/{providerKey} تحت عنوان المزود، ويتوقع استجابة 200 فيها state بقيمة pending أو unknown أو failed أو succeeded.
 
 كل استجابة حالة تحمل providerKey وstate وsignature بنص hex، وتضيف event عند succeeded. يثبت العامل تطابق providerKey مع المفتاح المحفوظ، ثم يتحقق من HMAC-SHA256 على JSON ذي مفاتيح المستوى الأعلى مرتبة ترتيبًا أبجديًا مع استبعاد signature. لا يسمح لنتيجة pending أو unknown أو failed بتعديل الحالة قبل نجاح نفس التحقق. عند succeeded يثبت أيضًا تطابق attemptId أو refundId داخل event مع المهمة، ثم يمرر الحدث للدالة المالية نفسها. عند pending أو unknown يعاد جدولة المطابقة دون إرسال أمر تحصيل جديد. تعتمد معالجة failed على سجل الحالة داخل قاعدة البيانات. يظل فشل الشبكة أو التوقيع قابلًا لإعادة المطابقة بالمفتاح المحفوظ.
+
+## الحسابات
+
+أضف accounts.sql بعد ترحيلات الشراء، ثم جهّز أول حساب إدارة بواسطة provision-account.mjs من ملف خاص خارج Git. تدعم auth.mjs الدخول والخروج وتغيير كلمة المرور وإدارة الحسابات. العقد وحدود معرّف الدخول والجلسة في [دليل الحسابات](../docs/design/ACCOUNTS_API.md). تُربط الحسابات بهويات LOGIN المهيأة في إعداد الخادم.
