@@ -37,3 +37,7 @@ npm start --prefix backend
 ## الحسابات
 
 أضف accounts.sql بعد ترحيلات الشراء، ثم جهّز أول حساب إدارة بواسطة provision-account.mjs من ملف خاص خارج Git. تدعم auth.mjs الدخول والخروج وتغيير كلمة المرور وإدارة الحسابات. العقد وحدود معرّف الدخول والجلسة في [دليل الحسابات](../docs/design/ACCOUNTS_API.md). تُربط الحسابات بهويات LOGIN المهيأة في إعداد الخادم.
+
+## مسودات الكتالوج — المرحلة A
+
+أضف db/first_purchase/catalog_drafts.sql بعد accounts.sql، واضبط catalog.enabled=true في إعداد الخادم لفتح المسارات الخاصة. يجهّز المشغل تفويض purchase_api.principal_branch ويمنح EXECUTE للدالتين catalog_read وcatalog_write المحددتين في [عقد الكتالوج](../docs/design/CATALOG_API.md). الحساب أو دور التاجر وحده لا يمنح حق فرع. الصور الخاصة bytea في PostgreSQL وتتحقق بواسطة sharp بإصدار مثبت. لا نشر للعميل أو توليد مخزون/عرض بيع من هذه المسودات، وapprove موقوف حتى السياسات المعتمدة.
