@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const cases = [
+  {name:'merchant-drafts-list-http',script:'catalog_drafts.cjs',env:{MQ_MERCHANT_LIST:'1'}},
   {name:'branch-permissions-http',script:'catalog_drafts.cjs',env:{MQ_BRANCH_API:'1'}},
   {name:'branch-permissions-reply-before',script:'catalog_drafts.cjs',env:{MQ_BRANCH_API:'1',MQ_BRANCH_LOSS:'before'}},
   {name:'branch-permissions-reply-after',script:'catalog_drafts.cjs',env:{MQ_BRANCH_API:'1',MQ_BRANCH_LOSS:'after'}},

@@ -50,8 +50,18 @@ async function main(){
     await db.query(branchMigration);
     assert.deepEqual((await db.query("select active,version from purchase_api.principal_branch where login='migration_existing' and branch_id=2")).rows,[{active:true,version:1}]);
     await db.query("delete from purchase_api.principal_branch where login='migration_existing';delete from purchase_api.principal where login='migration_existing'");
+    const listMigration=fs.readFileSync(path.join(__dirname,'merchant_draft_list.sql'),'utf8');
+    const priorGrants=(await db.query('select * from purchase_api.principal_branch order by login,branch_id')).rows;
+    await assert.rejects(db.query(listMigration.replace(/commit;\s*$/i,'select 1/0; commit;')),e=>e.code==='22012');
+    await db.query('rollback');
+    assert.equal(await scalar("select to_regprocedure('purchase_api.merchant_catalog_list(jsonb,text)') is null"),true);
+    assert.equal(await scalar("select to_regclass('catalog.merchant_draft_list_order') is null"),true);
+    assert.deepEqual(await snapshot(),before);
+    assert.deepEqual((await db.query('select * from purchase_api.principal_branch order by login,branch_id')).rows,priorGrants);
+    await db.query(listMigration);
+    assert.deepEqual(await snapshot(),before);
     const {hashPassword}=await import('../../backend/auth.mjs');
-    for(const [label,actor,merchant,customer]of [['gateway',null,null,null],['admin','admin',null,null],['adminpeer','admin',null,null],['merchant','merchant',1,null],['other','merchant',2,null],['customer','customer',null,1],['courier','courier',null,null],['service','service',null,null]]){
+    for(const [label,actor,merchant,customer]of [['gateway',null,null,null],['admin','admin',null,null],['adminpeer','admin',null,null],['merchant','merchant',1,null],['coworker','merchant',1,null],['other','merchant',2,null],['customer','customer',null,1],['courier','courier',null,null],['service','service',null,null]]){
       const login=prefix+'_'+label;const password=randomBytes(24).toString('base64url');
       await db.query(`create role "${login}" login password '${password}' nosuperuser nocreatedb nocreaterole noinherit nobypassrls`);
       roles.push(login);credentials[label]={user:login,password};
@@ -61,7 +71,7 @@ async function main(){
         continue;
       }
       await db.query('insert into purchase_api.principal(login,actor,merchant_id,customer_id) values($1,$2,$3,$4)',[login,actor,merchant,customer]);
-      for(const fn of ['account_read(text,jsonb,text)','account_write(text,jsonb,text)','account_credentials(text)','catalog_read(text,jsonb,text)','catalog_write(text,jsonb,text,text,text,bytea)','branch_access_read(text,jsonb,text)','branch_access_write(text,jsonb,text,text,text)'])
+      for(const fn of ['account_read(text,jsonb,text)','account_write(text,jsonb,text)','account_credentials(text)','catalog_read(text,jsonb,text)','catalog_write(text,jsonb,text,text,text,bytea)','branch_access_read(text,jsonb,text)','branch_access_write(text,jsonb,text,text,text)','merchant_catalog_list(jsonb,text)'])
         await db.query(`grant execute on function purchase_api.${fn} to "${login}"`);
       if(actor!=='service'){
         passwords[label]=randomBytes(24).toString('base64url');
@@ -87,7 +97,11 @@ async function main(){
       const r=await post('/v1/auth/login',{loginName:label+'.catalog',password:passwords[label]});
       assert.equal(r.status,200,JSON.stringify(r));tokens[label]=r.body.accessToken;return tokens[label];
     };
-    for(const label of ['admin','adminpeer','merchant','other','customer','courier'])await login(label);
+    for(const label of ['admin','adminpeer','merchant','coworker','other','customer','courier'])await login(label);
+    if(process.env.MQ_MERCHANT_LIST){
+      const probe=await request('GET','/v1/merchant/catalog/submissions',tokens.merchant);
+      assert.equal(probe.status,200,JSON.stringify(probe));
+    }
     if(process.env.MQ_BRANCH_API){
       const accountId=await scalar('select id::text from purchase_api.account where principal_login=$1',[credentials.merchant.user]);
       const probe=await request('GET','/v1/admin/accounts/'+accountId+'/branches',tokens.admin);
@@ -252,13 +266,19 @@ async function main(){
     assert.equal(await scalar("select count(*)::int from catalog.submission where state='approved'"),0);
     assert.ok(await scalar('select count(*)::int from catalog.audit_event')>0);
     let branchPermissions;
+    let merchantList;
+    if(process.env.MQ_MERCHANT_LIST){
+      merchantList=await require('./merchant_draft_list_tests.cjs')({db,scalar,request,post,tokens,credentials,login,waitBlocked,route,data,serviceToken,
+        pauseOn:key=>{pauseKey=key;const ready=new Promise(resolve=>{reachedHook=c=>resolve(c.client.processID);});return {ready,release:()=>{pauseKey=null;releaseHook();}};}});
+      assert.deepEqual(await snapshot(),before);
+    }
     if(process.env.MQ_BRANCH_API){
       branchPermissions=await require('./branch_permissions_tests.cjs')({db,scalar,request,post,tokens,credentials,login,waitBlocked,route,data,png,serviceToken,
         pauseOn:key=>{pauseKey=key;const ready=new Promise(resolve=>{reachedHook=c=>resolve(c.client.processID);});return {ready,release:()=>{pauseKey=null;releaseHook();}};},
         dropOn:key=>{dropKey=key;},loss:process.env.MQ_BRANCH_LOSS});
       assert.deepEqual(await snapshot(),before);
     }
-    console.log(JSON.stringify({catalog:'passed',http:true,postgres:await scalar('show server_version'),migrationRollback:true,restrictedRoles:true,stockAndMoneyUnchanged:true,publicationBlocked:true,privateImages:true,authorizationRaces:checks,replyLoss:loss||'none',decisionLoss:loss||'none',decisionRace:true,queuePagination:{pages,listed:listed.size},branchPermissions}));
+    console.log(JSON.stringify({catalog:'passed',http:true,postgres:await scalar('show server_version'),migrationRollback:true,restrictedRoles:true,stockAndMoneyUnchanged:true,publicationBlocked:true,privateImages:true,authorizationRaces:checks,replyLoss:loss||'none',decisionLoss:loss||'none',decisionRace:true,queuePagination:{pages,listed:listed.size},branchPermissions,merchantList}));
   }finally{
     await db.query('rollback').catch(()=>{});
     releaseHook?.();if(api)await api.close();
