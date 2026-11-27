@@ -1,6 +1,8 @@
 # تشغيل اختبارات أول مسار شراء
 
-أضيفت ثلاث حالات branch-permissions-http وbranch-permissions-reply-before وbranch-permissions-reply-after، فيصبح العدد83. تثبت branch_permissions.sql بعد catalog_drafts.sql، وتدير المنح والسحب عبر HTTP. تثبت رفض المسودة والصورة بعد سحب الفرع أثناء انتظار الأقفال، وتختبر التكرار وسباق النسخة القديمة وإلغاء جلسة الإدارة وفقد الرد. [العقد](../../docs/design/BRANCH_PERMISSIONS_API.md) و[تقرير التحقق](../../docs/verification/BRANCH_PERMISSIONS_HTTP.md).
+تضيف merchant-drafts-list-http قائمة المسودات والبحث والتصفية والصفحات والعزل داخل المنشأة وبين التجار، وسحب الفرع أثناء انتظار القراءة وإبطال الجلسة. يصبح الإجمالي84 حالة. تثبت merchant_draft_list.sql بعد branch_permissions.sql؛ [النتائج](../../docs/verification/MERCHANT_DRAFT_LIST_HTTP.md).
+
+تشمل المجموعة ثلاث حالات branch-permissions-http وbranch-permissions-reply-before وbranch-permissions-reply-after. تثبت branch_permissions.sql بعد catalog_drafts.sql، وتدير المنح والسحب عبر HTTP. تثبت رفض المسودة والصورة بعد سحب الفرع أثناء انتظار الأقفال، وتختبر التكرار وسباق النسخة القديمة وإلغاء جلسة الإدارة وفقد الرد. [العقد](../../docs/design/BRANCH_PERMISSIONS_API.md) و[تقرير التحقق](../../docs/verification/BRANCH_PERMISSIONS_HTTP.md).
 
 يتطلب Node.js وnpm. الإصدارات مثبتة في package-lock.json. داخل جذر المشروع نفّذ:
 
