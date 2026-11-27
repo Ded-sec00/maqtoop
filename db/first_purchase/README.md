@@ -1,5 +1,7 @@
 # تشغيل اختبارات أول مسار شراء
 
+أضيفت ثلاث حالات branch-permissions-http وbranch-permissions-reply-before وbranch-permissions-reply-after، فيصبح العدد83. تثبت branch_permissions.sql بعد catalog_drafts.sql، وتدير المنح والسحب عبر HTTP. تثبت رفض المسودة والصورة بعد سحب الفرع أثناء انتظار الأقفال، وتختبر التكرار وسباق النسخة القديمة وإلغاء جلسة الإدارة وفقد الرد. [العقد](../../docs/design/BRANCH_PERMISSIONS_API.md) و[تقرير التحقق](../../docs/verification/BRANCH_PERMISSIONS_HTTP.md).
+
 يتطلب Node.js وnpm. الإصدارات مثبتة في package-lock.json. داخل جذر المشروع نفّذ:
 
 ```powershell
