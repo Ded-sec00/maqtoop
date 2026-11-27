@@ -1,6 +1,6 @@
 # مقطوب | Maqtoop
 
-مستودع مقطوب. المرحلة الحالية تنفيذ وتجربة أول مسار شراء عبر API وPostgreSQL.
+مستودع مقطوب. المرحلة الحالية تنفيذ وتجربة أول مسار شراء والحسابات وتسجيل الدخول عبر API وPostgreSQL.
 
 يوجد نموذج PostgreSQL تجريبي واختبارات تشغيل في [db/first_purchase](db/first_purchase/README.md). تفاصيل الحالة والفحوص في [تقرير المراجعة](docs/verification/FIRST_PURCHASE_REVIEW.md).
 
