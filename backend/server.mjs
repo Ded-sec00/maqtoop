@@ -2,6 +2,7 @@ import http from 'node:http';
 import { createHash, createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import pg from 'pg';
 import { createAuth, AuthError } from './auth.mjs';
+import { createCatalog } from './catalog.mjs';
 
 const { Pool } = pg;
 const maximumBodyBytes = 32768;
@@ -146,6 +147,8 @@ export function createApi(config) {
     return pools.get(login);
   };
   const handleAuth = createAuth({ gateway, actorPool, configuredLogins:Object.keys(config.actors) });
+  const handleCatalog = config.catalog?.enabled
+    ? createCatalog({gateway,actorPool,configuredLogins:Object.keys(config.actors),testHooks:config.testHooks}) : null;
   let timer;
   let worker;
   let closing = false;
@@ -158,13 +161,15 @@ export function createApi(config) {
     let transaction = false;
     try {
       const url = new URL(request.url,'http://localhost');
-      if (url.search) throw invalidInput();
       const authResult = await handleAuth(request,response,{requestId,readBody});
       if (authResult) {
         operation = authResult.operation;
         status = authResult.status;
         return;
       }
+      const catalogResult = await handleCatalog?.(request,response,{requestId,readBody});
+      if (catalogResult) {operation=catalogResult.operation;status=catalogResult.status;return;}
+      if (url.search) throw invalidInput();
       const route = routeFor(request.method,url.pathname);
       operation = route.operation;
       const raw = await readBody(request);

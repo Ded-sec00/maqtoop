@@ -9,6 +9,9 @@ import { spawnSync } from 'node:child_process';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const cases = [
+  {name:'catalog-http',script:'catalog_drafts.cjs',env:{}},
+  {name:'catalog-http-reply-before',script:'catalog_drafts.cjs',env:{MQ_CATALOG_LOSS:'before'}},
+  {name:'catalog-http-reply-after',script:'catalog_drafts.cjs',env:{MQ_CATALOG_LOSS:'after'}},
   {name:'accounts-http',script:'accounts.cjs',env:{}},
   {name:'accounts-http-third-both-loss-before',script:'accounts.cjs',env:{MQ_FRESH_RETRY_LOSS:'before',MQ_PARALLEL_FRESH_REPLAY:'1',MQ_RETRY_BOTH_LOSS:'1',MQ_THIRD_HOLDER_LOSS:'before',MQ_THIRD_BOTH_LOSS:'1'}},
   {name:'accounts-http-third-both-loss-after',script:'accounts.cjs',env:{MQ_FRESH_RETRY_LOSS:'before',MQ_PARALLEL_FRESH_REPLAY:'1',MQ_RETRY_BOTH_LOSS:'1',MQ_THIRD_HOLDER_LOSS:'after',MQ_THIRD_BOTH_LOSS:'1'}},
