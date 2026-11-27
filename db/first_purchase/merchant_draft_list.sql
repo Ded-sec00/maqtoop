@@ -1,6 +1,16 @@
 -- Apply once after branch_permissions.sql. Read-only API; no business data migration.
 begin;
 create index merchant_draft_list_order on catalog.submission(created_by,merchant_id,created_at,id);
+-- The list must render from the same statement snapshot as its filters.
+-- Keep the legacy volatile renderer for writers that must see their own writes.
+create function catalog.merchant_submission_json(sid uuid) returns jsonb
+language sql stable set search_path=pg_catalog,catalog,pg_temp as $$
+ select jsonb_build_object('id',s.id::text,'branchId',s.branch_id::text,'state',s.state,'version',s.version,'revision',s.current_revision,
+  'content',r.content,'publicationEnabled',false,'missingDependencies',jsonb_build_array('sale_price_policy','warranty_policy'),
+  'reviews',coalesce((select jsonb_agg(jsonb_build_object('revision',d.revision_number,'decision',d.decision,'reason',d.reason) order by d.revision_number)
+   from catalog.review_decision d where d.submission_id=s.id),'[]'::jsonb))
+ from catalog.submission s join catalog.submission_revision r on r.submission_id=s.id and r.revision_number=s.current_revision where s.id=sid;
+$$;
 create function purchase_api.merchant_catalog_list(data jsonb,token_hash text) returns jsonb
 language plpgsql security definer set search_path=pg_catalog,catalog,purchase_api,pg_temp as $$
 declare p purchase_api.principal; bid bigint; allowed_branches bigint[]:='{}'; grant_row record;
@@ -32,7 +42,7 @@ begin
  end if;
  -- Both session and branch authority are current after the permission-lock wait.
  p:=purchase_api.http_actor(token_hash,'merchant',true);
- select coalesce(jsonb_agg(catalog.submission_json(x.id)||jsonb_build_object('createdAt',to_char(x.created_at at time zone 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"')) order by x.created_at,x.id),'[]'::jsonb)
+ select coalesce(jsonb_agg(catalog.merchant_submission_json(x.id)||jsonb_build_object('createdAt',to_char(x.created_at at time zone 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"')) order by x.created_at,x.id),'[]'::jsonb)
  into items from (
   select s.id,s.created_at from catalog.submission s join catalog.submission_revision r on r.submission_id=s.id and r.revision_number=s.current_revision
   where s.created_by=p.login and s.merchant_id=p.merchant_id and s.branch_id=any(allowed_branches)
@@ -45,4 +55,5 @@ begin
  return jsonb_build_object('items',items,'hasMore',more,'nextCursor',case when more then jsonb_build_object('at',items->(page_size-1)->>'createdAt','id',items->(page_size-1)->>'id') else null end,'publicationEnabled',false);
 end $$;
 revoke all on function purchase_api.merchant_catalog_list(jsonb,text) from public;
+revoke all on function catalog.merchant_submission_json(uuid) from public;
 commit;

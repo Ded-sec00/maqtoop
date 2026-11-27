@@ -55,6 +55,7 @@ async function main(){
     await assert.rejects(db.query(listMigration.replace(/commit;\s*$/i,'select 1/0; commit;')),e=>e.code==='22012');
     await db.query('rollback');
     assert.equal(await scalar("select to_regprocedure('purchase_api.merchant_catalog_list(jsonb,text)') is null"),true);
+    assert.equal(await scalar("select to_regprocedure('catalog.merchant_submission_json(uuid)') is null"),true);
     assert.equal(await scalar("select to_regclass('catalog.merchant_draft_list_order') is null"),true);
     assert.deepEqual(await snapshot(),before);
     assert.deepEqual((await db.query('select * from purchase_api.principal_branch order by login,branch_id')).rows,priorGrants);

@@ -24,3 +24,5 @@
 الملفات: backend/catalog.mjs وcatalog-list.mjs؛ db/first_purchase/merchant_draft_list.sql وmerchant_draft_list_tests.cjs وcatalog_drafts.cjs وrun-tests.mjs؛ عقد CATALOG_API وتقرير تحقق ودليل المشروع.
 
 النتيجة:84/84 عبر الحارس على PostgreSQL16.16 وHTTP، و15/15 لحارسCI، ومراجعة مستقلة بلاP1/P2 مؤكدة. [الدليل](../../verification/MERCHANT_DRAFT_LIST_HTTP.md). التنفيذ محلي فقط على فرع المهمة، والنشر والبيع من المسودات مقفلان.
+
+متابعة مراجعةPR#7: وجد اختلاف لقطة بين التصفية وDTO عند التعديل المتزامن، وأثبته اختبار فاشل علىPostgreSQL وHTTP. أضيف catalog.merchant_submission_json(uuid) قارئSTABLE خاص بالقائمة، مع إبقاء قارئ الكتابة القديم وإلغاءPUBLIC EXECUTE للجديد. اختبار القفل المصطنع يثبت مطابقة استجابة الصفحة القديمة للتصفية ورؤية القراءة التالية النسخة الجديدة. أكد مراجع المتطلبات الإصلاح؛ يعاد تشغيل المجموعة قبل دمجPR بناءً على تفويض المستخدم اللاحق.

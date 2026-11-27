@@ -27,6 +27,7 @@ module.exports=async function(c){
   const r=await post(route,{...data,model},tokens.merchant,'list-create-'+own.length);assert.equal(r.status,201);own.push({id:r.body.id,state:'draft',branchId:'1'});
  }
  const snapshot=async()=>({submissions:(await db.query('select * from catalog.submission order by id')).rows,revisions:(await db.query('select * from catalog.submission_revision order by submission_id,revision_number')).rows});
+ const snapshotConsistent=await require('./merchant_list_snapshot_test.cjs')({db,scalar,request,post,tokens,credentials,waitBlocked,route,data});
  const before=await snapshot();
  const get=(params={},token=tokens.merchant)=>request('GET',route+(Object.keys(params).length?'?'+new URLSearchParams(params):''),token);
  const collect=async(params={},token=tokens.merchant)=>{
@@ -75,5 +76,5 @@ module.exports=async function(c){
  assert.equal((await post('/v1/auth/logout-all',{},oldToken)).status,200);await db.query('commit');assert.equal((await stale).status,401);await login('merchant');
  assert.equal((await get({branchId:'2'})).status,200);
  assert.deepEqual(await snapshot(),before);
- return {listed:listed.items.length,pages:listed.pages,tenantIsolation:true,sameMerchantOwnerIsolation:true,authorizedBranchesOnly:true,filtersAndLiteralSearch:true,cursorAfterRevoke:true,queuedListFiltered:true,queuedExplicitBranchStatus:403,staleSessionStatus:401,noReadMutations:true,publicationBlocked:true};
+ return {listed:listed.items.length,pages:listed.pages,tenantIsolation:true,sameMerchantOwnerIsolation:true,authorizedBranchesOnly:true,filtersAndLiteralSearch:true,snapshotConsistent,cursorAfterRevoke:true,queuedListFiltered:true,queuedExplicitBranchStatus:403,staleSessionStatus:401,noReadMutations:true,publicationBlocked:true};
 };
