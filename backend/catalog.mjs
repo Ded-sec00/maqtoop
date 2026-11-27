@@ -10,6 +10,9 @@ function canonical(x){
   return JSON.stringify(x);
 }
 function routeFor(method,path){
+  const access=path.match(/^\/v1\/admin\/accounts\/([^/]+)\/branches(?:\/([^/]+)\/(grant|revoke))?$/);
+  if(access&&((!access[2]&&method==='GET')||(access[2]&&method==='POST')))
+    return {op:'access/'+(access[3]||'list'),accountId:access[1],...(access[2]?{branchId:access[2]}:{})};
   const root='/v1/merchant/catalog/submissions';const admin='/v1/admin/catalog/submissions';
   if(method==='POST'&&path===root)return {op:'draft/create'};
   if(method==='GET'&&path===admin)return {op:'review/list'};
@@ -35,9 +38,11 @@ export function createCatalog({gateway,actorPool,configuredLogins,testHooks}){
     let cursor;
     if(url.search){
       cursor=url.searchParams.get('cursor');
-      if(route.op!=='review/list'||[...url.searchParams.keys()].some(k=>k!=='cursor')||url.searchParams.getAll('cursor').length!==1||!uuid.test(cursor||''))throw invalid();
+      if(!['review/list','access/list'].includes(route.op)||[...url.searchParams.keys()].some(k=>k!=='cursor')||url.searchParams.getAll('cursor').length!==1||!(route.op==='access/list'?/^[1-9][0-9]{0,18}$/:uuid).test(cursor||''))throw invalid();
     }
     if(route.id&&!uuid.test(route.id))throw invalid();
+    if(route.accountId&&!uuid.test(route.accountId))throw invalid();
+    if(route.branchId&&!/^[1-9][0-9]{0,18}$/.test(route.branchId))throw invalid();
     const authorization=request.headers.authorization;
     if(typeof authorization!=='string'||!/^Bearer [A-Za-z0-9_-]{20,256}$/.test(authorization))throw new AuthError(401,'INVALID_SESSION','الجلسة غير صالحة');
     const token=hash(authorization.slice(7));
@@ -59,14 +64,15 @@ export function createCatalog({gateway,actorPool,configuredLogins,testHooks}){
         if(!body||typeof body!=='object'||Array.isArray(body)||Object.hasOwn(body,'id'))throw invalid();
       }else if(raw.length)throw invalid();
     }
-    const data={...body,...(route.id?{id:route.id}:{}),...(cursor?{cursor}:{})};
+    if(route.accountId&&['accountId','branchId'].some(k=>Object.hasOwn(body,k)))throw invalid();
+    const data={...body,...(route.id?{id:route.id}:{}),...(route.accountId?{accountId:route.accountId}:{}),...(route.branchId?{branchId:route.branchId}:{}),...(cursor?{cursor}:{})};
     const client=await actorPool(login).connect();let transaction=false;
     try{
       await client.query('begin');transaction=true;let result;
       if(write){
         const fingerprint=hash(canonical(data)+(bytes?'|'+hash(bytes):''));
-        result=(await client.query('select * from purchase_api.catalog_write($1,$2::jsonb,$3,$4,$5,$6)',[route.op,JSON.stringify(data),token,key,fingerprint,bytes])).rows[0];
-      }else result={status:200,body:(await client.query('select purchase_api.catalog_read($1,$2::jsonb,$3) as body',[route.op,JSON.stringify(data),token])).rows[0].body};
+        result=(await client.query(route.accountId?'select * from purchase_api.branch_access_write($1,$2::jsonb,$3,$4,$5)':'select * from purchase_api.catalog_write($1,$2::jsonb,$3,$4,$5,$6)',[route.op,JSON.stringify(data),token,key,fingerprint,...(route.accountId?[]:[bytes])])).rows[0];
+      }else result={status:200,body:(await client.query('select purchase_api.'+(route.accountId?'branch_access_read':'catalog_read')+'($1,$2::jsonb,$3) as body',[route.op,JSON.stringify(data),token])).rows[0].body};
       const context={op:'catalog/'+route.op,key,client,request,response};
       await testHooks?.beforeCommit?.(context);
       if(request.aborted||response.destroyed){await client.query('rollback');transaction=false;return {operation:context.op,status:499};}
@@ -83,7 +89,7 @@ export function createCatalog({gateway,actorPool,configuredLogins,testHooks}){
     }catch(error){
       if(transaction)await client.query('rollback').catch(()=>{});
       testHooks?.onError?.(error);
-      if(error.code==='P0001'&&['CATALOG_POLICY_NOT_CONFIGURED','CATALOG_VERSION_CONFLICT','CATALOG_STATE_CONFLICT'].includes(error.message))
+      if(error.code==='P0001'&&['CATALOG_POLICY_NOT_CONFIGURED','CATALOG_VERSION_CONFLICT','CATALOG_STATE_CONFLICT','BRANCH_VERSION_CONFLICT','BRANCH_TARGET_NOT_ELIGIBLE'].includes(error.message))
         throw new AuthError(409,error.message,'تعذر الإجراء بحالة الطلب أو السياسات الحالية');
       throw error;
     }finally{client.release();}

@@ -40,4 +40,6 @@ npm start --prefix backend
 
 ## مسودات الكتالوج — المرحلة A
 
+بعد catalog_drafts.sql أضف branch_permissions.sql لإدارة منح وسحب الفروع عبر HTTP بدل حذف صف التفويض. يحتاج LOGIN الإداري EXECUTE على branch_access_read(text,jsonb,text) وbranch_access_write(text,jsonb,text,text,text). لا تمنح صلاحيات جداول مباشرة. [عقد الفروع والترحيل والرجوع](../docs/design/BRANCH_PERMISSIONS_API.md) يوضح النسخ والتكرار وإعادة فحص الصلاحيات بعد الأقفال. يظل catalog.enabled هو مفتاح فتح هذه المسارات الخاصة، دون نشر أو بيع.
+
 أضف db/first_purchase/catalog_drafts.sql بعد accounts.sql، واضبط catalog.enabled=true في إعداد الخادم لفتح المسارات الخاصة. يجهّز المشغل تفويض purchase_api.principal_branch ويمنح EXECUTE للدالتين catalog_read وcatalog_write المحددتين في [عقد الكتالوج](../docs/design/CATALOG_API.md). الحساب أو دور التاجر وحده لا يمنح حق فرع. الصور الخاصة bytea في PostgreSQL وتتحقق بواسطة sharp بإصدار مثبت. لا نشر للعميل أو توليد مخزون/عرض بيع من هذه المسودات، وapprove موقوف حتى السياسات المعتمدة.

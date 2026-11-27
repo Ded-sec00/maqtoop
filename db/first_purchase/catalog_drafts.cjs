@@ -17,7 +17,7 @@ async function main(){
     return out;
   };
   let releaseHook;let reachedHook;let pauseKey;let dropKey;
-  const loss=process.env.MQ_CATALOG_LOSS;
+  const loss=process.env.MQ_CATALOG_LOSS||process.env.MQ_BRANCH_LOSS;
   const hooks={onError:e=>{if(!['28000','42501','22023','P0001','P0002'].includes(e.code))console.error('catalog test diagnostic',e.code,e.message);},beforeCommit:async c=>{
     if(pauseKey&&c.key===pauseKey){reachedHook(c);await new Promise(r=>{releaseHook=r;});}
     if(dropKey&&c.key===dropKey&&loss==='before'){dropKey=null;c.response.destroy();}
@@ -39,6 +39,17 @@ async function main(){
     assert.deepEqual(await snapshot(),before);
     await db.query(migration);
     assert.deepEqual(await snapshot(),before);
+    await db.query("insert into purchase_api.principal(login,actor,merchant_id) values('migration_existing','merchant',1);insert into purchase_api.principal_branch(login,branch_id) values('migration_existing',2)");
+    const branchMigration=fs.readFileSync(path.join(__dirname,'branch_permissions.sql'),'utf8');
+    await assert.rejects(db.query(branchMigration.replace(/commit;\s*$/i,'select 1/0; commit;')),e=>e.code==='22012');
+    await db.query('rollback');
+    assert.equal(await scalar("select to_regclass('catalog.branch_access_audit') is null"),true);
+    assert.equal(await scalar("select count(*)::int from information_schema.columns where table_schema='purchase_api' and table_name='principal_branch' and column_name='active'"),0);
+    assert.deepEqual(await snapshot(),before);
+    assert.equal(await scalar("select count(*)::int from purchase_api.principal_branch where login='migration_existing' and branch_id=2"),1);
+    await db.query(branchMigration);
+    assert.deepEqual((await db.query("select active,version from purchase_api.principal_branch where login='migration_existing' and branch_id=2")).rows,[{active:true,version:1}]);
+    await db.query("delete from purchase_api.principal_branch where login='migration_existing';delete from purchase_api.principal where login='migration_existing'");
     const {hashPassword}=await import('../../backend/auth.mjs');
     for(const [label,actor,merchant,customer]of [['gateway',null,null,null],['admin','admin',null,null],['adminpeer','admin',null,null],['merchant','merchant',1,null],['other','merchant',2,null],['customer','customer',null,1],['courier','courier',null,null],['service','service',null,null]]){
       const login=prefix+'_'+label;const password=randomBytes(24).toString('base64url');
@@ -50,14 +61,14 @@ async function main(){
         continue;
       }
       await db.query('insert into purchase_api.principal(login,actor,merchant_id,customer_id) values($1,$2,$3,$4)',[login,actor,merchant,customer]);
-      for(const fn of ['account_read(text,jsonb,text)','account_write(text,jsonb,text)','account_credentials(text)','catalog_read(text,jsonb,text)','catalog_write(text,jsonb,text,text,text,bytea)'])
+      for(const fn of ['account_read(text,jsonb,text)','account_write(text,jsonb,text)','account_credentials(text)','catalog_read(text,jsonb,text)','catalog_write(text,jsonb,text,text,text,bytea)','branch_access_read(text,jsonb,text)','branch_access_write(text,jsonb,text,text,text)'])
         await db.query(`grant execute on function purchase_api.${fn} to "${login}"`);
       if(actor!=='service'){
         passwords[label]=randomBytes(24).toString('base64url');
         await db.query('insert into purchase_api.account(login_name,principal_login,password_hash) values($1,$2,$3)',[label+'.catalog',login,await hashPassword(passwords[label])]);
       }
     }
-    await db.query('insert into purchase_api.principal_branch values($1,1),($2,3)',[credentials.merchant.user,credentials.other.user]);
+    await db.query('insert into purchase_api.principal_branch(login,branch_id) values($1,1),($2,3)',[credentials.merchant.user,credentials.other.user]);
     const serviceToken=randomBytes(32).toString('base64url');
     await db.query("insert into purchase_api.http_session(token_hash,login,expires_at) values($1,$2,clock_timestamp()+interval '1 hour')",[hash(serviceToken),credentials.service.user]);
     const {createApi}=await import('../../backend/server.mjs');
@@ -77,6 +88,11 @@ async function main(){
       assert.equal(r.status,200,JSON.stringify(r));tokens[label]=r.body.accessToken;return tokens[label];
     };
     for(const label of ['admin','adminpeer','merchant','other','customer','courier'])await login(label);
+    if(process.env.MQ_BRANCH_API){
+      const accountId=await scalar('select id::text from purchase_api.account where principal_login=$1',[credentials.merchant.user]);
+      const probe=await request('GET','/v1/admin/accounts/'+accountId+'/branches',tokens.admin);
+      assert.equal(probe.status,200,JSON.stringify(probe));
+    }
     const route='/v1/merchant/catalog/submissions';
     const data={branchId:'1',category:'phone',condition:'new',brand:'Example',model:'Model A',storageGb:128,ramGb:8,color:'black',suggestedTitle:'Example handset',description:'Test product',supplyAmount:'54000.25',currency:'YER',initialQuantity:1,proposedWarranty:'',mediaAssetIds:[]};
     for(const label of ['customer','courier'])assert.equal((await post(route,data,tokens[label],'denied')).status,403);
@@ -166,7 +182,7 @@ async function main(){
     await waitBlocked(credentials.merchant.user);
     const peer=new Client();await peer.connect();await peer.query('delete from purchase_api.principal_branch where login=$1',[credentials.merchant.user]);await peer.end();
     await db.query('commit');assert.equal((await queued).status,403);
-    await db.query('insert into purchase_api.principal_branch values($1,1)',[credentials.merchant.user]);checks.push('branch-revoke');
+    await db.query('insert into purchase_api.principal_branch(login,branch_id) values($1,1)',[credentials.merchant.user]);checks.push('branch-revoke');
     // Withdrawal wins against a queued review of the same submitted version.
     const resubmit=await post(route+'/'+id+'/submit',{expectedVersion:update.body.version},tokens.merchant,'submit-2');assert.equal(resubmit.status,200);
     pauseKey='withdraw-first';let hookPid;
@@ -235,7 +251,14 @@ async function main(){
     assert.deepEqual(await snapshot(),before);
     assert.equal(await scalar("select count(*)::int from catalog.submission where state='approved'"),0);
     assert.ok(await scalar('select count(*)::int from catalog.audit_event')>0);
-    console.log(JSON.stringify({catalog:'passed',http:true,postgres:await scalar('show server_version'),migrationRollback:true,restrictedRoles:true,stockAndMoneyUnchanged:true,publicationBlocked:true,privateImages:true,authorizationRaces:checks,replyLoss:loss||'none',decisionLoss:loss||'none',decisionRace:true,queuePagination:{pages,listed:listed.size}}));
+    let branchPermissions;
+    if(process.env.MQ_BRANCH_API){
+      branchPermissions=await require('./branch_permissions_tests.cjs')({db,scalar,request,post,tokens,credentials,login,waitBlocked,route,data,png,serviceToken,
+        pauseOn:key=>{pauseKey=key;const ready=new Promise(resolve=>{reachedHook=c=>resolve(c.client.processID);});return {ready,release:()=>{pauseKey=null;releaseHook();}};},
+        dropOn:key=>{dropKey=key;},loss:process.env.MQ_BRANCH_LOSS});
+      assert.deepEqual(await snapshot(),before);
+    }
+    console.log(JSON.stringify({catalog:'passed',http:true,postgres:await scalar('show server_version'),migrationRollback:true,restrictedRoles:true,stockAndMoneyUnchanged:true,publicationBlocked:true,privateImages:true,authorizationRaces:checks,replyLoss:loss||'none',decisionLoss:loss||'none',decisionRace:true,queuePagination:{pages,listed:listed.size},branchPermissions}));
   }finally{
     await db.query('rollback').catch(()=>{});
     releaseHook?.();if(api)await api.close();
