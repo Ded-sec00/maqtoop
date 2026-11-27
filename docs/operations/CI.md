@@ -1,6 +1,8 @@
 # CI لاختبارات PostgreSQL وHTTP
 
-يرتبط بالمهمة08 في EXECUTION_PLAN.md وبمتطلب العزل R03 والتحقق الحقيقي في RULES.md. الملف [.github/workflows/tests.yml](../../.github/workflows/tests.yml) يشغّل فحصًا اسمه الثابت **PostgreSQL + HTTP** على Windows وNode22 عند كل push وpull_request وmerge_group، دون مرشحات مسارات أو تجاوز طلبات المسودة. صلاحية الرمز contents:read فقط، ولا يحتاج أسرارًا أو قاعدة خارجية أو مزود دفع.
+يرتبط بالمهمة08 في EXECUTION_PLAN.md وبمتطلب العزل R03 والتحقق الحقيقي في RULES.md. الملف [.github/workflows/tests.yml](../../.github/workflows/tests.yml) يشغّل فحصًا اسمه الثابت **PostgreSQL + HTTP** على Ubuntu24.04 وNode22 عند كل push وpull_request وmerge_group، دون مرشحات مسارات أو تجاوز طلبات المسودة. صلاحية الرمز contents:read فقط، ولا يحتاج أسرارًا أو قاعدة خارجية أو مزود دفع.
+
+كشفت تجربة GitHub الأولى أن عامل Windows يعمل بصلاحيات إدارية ويرفض PostgreSQL بدء التشغيل بهذه الصلاحيات. لذلك اختير عامل Ubuntu بحساب runner العادي. تبقى المجموعة نفسها قابلة للتشغيل محليًا على Windows، دون تخفيف قيود PostgreSQL أو صلاحيات التطبيق.
 
 يثبت الاعتماديات بأمر npm ci لكل من backend وdb/first_purchase، باستخدام ملفات القفل الحالية. إجراءات GitHub الرسمية مثبتة بمعرفات commit، والمهلة20 دقيقة. لا ينفذ CI نشرًا.
 
