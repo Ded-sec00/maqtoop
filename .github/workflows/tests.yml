@@ -1,0 +1,49 @@
+name: PostgreSQL and HTTP tests
+
+on:
+  push:
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-http:
+    name: PostgreSQL + HTTP
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Remove historical test report
+        run: Remove-Item -LiteralPath db/first_purchase/results.json -ErrorAction SilentlyContinue
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            db/first_purchase/package-lock.json
+      - name: Install backend dependencies
+        run: npm ci --prefix backend
+      - name: Install PostgreSQL test dependencies
+        run: npm ci --prefix db/first_purchase
+      - name: Verify failure and zero-test guards
+        run: node --test scripts/ci/run-tests.test.mjs
+      - name: Run verified PostgreSQL and HTTP suite
+        run: node scripts/ci/run-tests.mjs
+      - name: Retain test evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: db/first_purchase/results.json
+          if-no-files-found: warn
+          retention-days: 14

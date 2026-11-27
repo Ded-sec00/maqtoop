@@ -88,7 +88,7 @@ const postgres = new EmbeddedPostgres({
   onLog:message=>logs.push(String(message)),
   onError:message=>logs.push(String(message)),
 });
-const report = { startedAt:new Date().toISOString(), clusterDirectory, results:[] };
+const report = { startedAt:new Date().toISOString(), clusterDirectory, expectedCount:cases.length, results:[] };
 try {
   await postgres.initialise();
   await postgres.start();

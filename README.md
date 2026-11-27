@@ -4,6 +4,8 @@
 
 يوجد نموذج PostgreSQL تجريبي واختبارات تشغيل في [db/first_purchase](db/first_purchase/README.md). تفاصيل الحالة والفحوص في [تقرير المراجعة](docs/verification/FIRST_PURCHASE_REVIEW.md).
 
+تشغيل الاختبارات الآلي وشروط النجاح وحماية الدمج موضحة في [دليل CI](docs/operations/CI.md).
+
 ## ابدأ من هنا
 
 - [دليل المشروع الكامل](PROJECT_GUIDE.md): القرارات، المتطلبات، البنية المقترحة، المهارات، طريقة العمل والاختبار والتسليم.
