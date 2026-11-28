@@ -1,5 +1,7 @@
 # تشغيل اختبارات أول مسار شراء
 
+تضيف catalog-options-http اختبار مصادر فروع التاجر وخيارات التجار والفروع للإدارة: دور ومنشأة وتفويض حالي، بحث وصفحات ومعرفات bigint، سحب مثبت أثناء انتظار قفل التفويض، وتسع حالات إلغاء جلسة بعد أقفال فعلية، دون تغيير النشر أو المال أو المخزون. الترحيلة catalog_options.sql بعد admin_review_list.sql؛ [العقد](../../docs/design/CATALOG_OPTIONS_API.md).
+
 تضيفadmin-review-list-http البحث والتصفية والصفحات للإدارة فقط، وإلغاء الجلسة أثناء انتظار أقفال التاجر/الفرع/المؤشر، واتساقاللقطة أثناء تعديلمتزامن؛ يصبح الإجمالي86حالة. تثبتadmin_review_list.sql بعدcatalog_history.sql. [العقد](../../docs/design/ADMIN_REVIEW_LIST_API.md) و[النتائج](../../docs/verification/ADMIN_REVIEW_LIST_HTTP.md).
 
 تضيف catalog-history-http سجل النسخ والمقارنة والعزل وسحب التفويض أثناء انتظار القفل، فيصبح الإجمالي85 حالة. تثبتcatalog_history.sql بعدmerchant_draft_list.sql. [العقد](../../docs/design/CATALOG_HISTORY_API.md) و[تقرير التحقق](../../docs/verification/CATALOG_HISTORY_HTTP.md).

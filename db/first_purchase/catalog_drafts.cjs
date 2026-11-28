@@ -78,6 +78,14 @@ async function main(){
     assert.deepEqual(await snapshot(),before);
     await db.query(reviewMigration);
     assert.deepEqual(await snapshot(),before);
+    const optionsMigration=fs.readFileSync(path.join(__dirname,'catalog_options.sql'),'utf8');
+    await assert.rejects(db.query(optionsMigration.replace(/commit;\s*$/i,'select 1/0; commit;')),e=>e.code==='22012');
+    await db.query('rollback');
+    assert.equal(await scalar("select to_regprocedure('purchase_api.catalog_options(text,jsonb,text)') is null"),true);
+    assert.deepEqual(await snapshot(),before);
+    assert.deepEqual((await db.query('select * from purchase_api.principal_branch order by login,branch_id')).rows,priorGrants);
+    await db.query(optionsMigration);
+    assert.deepEqual(await snapshot(),before);
     const {hashPassword}=await import('../../backend/auth.mjs');
     for(const [label,actor,merchant,customer]of [['gateway',null,null,null],['admin','admin',null,null],['adminpeer','admin',null,null],['merchant','merchant',1,null],['coworker','merchant',1,null],['other','merchant',2,null],['customer','customer',null,1],['courier','courier',null,null],['service','service',null,null]]){
       const login=prefix+'_'+label;const password=randomBytes(24).toString('base64url');
@@ -91,6 +99,8 @@ async function main(){
       await db.query('insert into purchase_api.principal(login,actor,merchant_id,customer_id) values($1,$2,$3,$4)',[login,actor,merchant,customer]);
       for(const fn of ['account_read(text,jsonb,text)','account_write(text,jsonb,text)','account_credentials(text)','catalog_read(text,jsonb,text)','catalog_write(text,jsonb,text,text,text,bytea)','branch_access_read(text,jsonb,text)','branch_access_write(text,jsonb,text,text,text)','merchant_catalog_list(jsonb,text)','catalog_history(text,jsonb,text)','catalog_review_list(jsonb,text)'])
         await db.query(`grant execute on function purchase_api.${fn} to "${login}"`);
+      // Grant deliberately to all fixture actors to test SQL role checks as well as HTTP routing.
+      await db.query(`grant execute on function purchase_api.catalog_options(text,jsonb,text) to "${login}"`);
       if(actor!=='service'){
         passwords[label]=randomBytes(24).toString('base64url');
         await db.query('insert into purchase_api.account(login_name,principal_login,password_hash) values($1,$2,$3)',[label+'.catalog',login,await hashPassword(passwords[label])]);
@@ -295,6 +305,12 @@ async function main(){
     let merchantList;
     let history;
     let adminReview;
+    let catalogOptions;
+    if(process.env.MQ_CATALOG_OPTIONS){
+      catalogOptions=await require('./catalog_options_tests.cjs')({db,scalar,request,post,tokens,passwords,credentials,login,waitBlocked,route,data,serviceToken,
+        pauseOn:key=>{pauseKey=key;const ready=new Promise(resolve=>{reachedHook=c=>resolve(c.client.processID);});return {ready,release:()=>{pauseKey=null;releaseHook();}};}});
+      assert.deepEqual(await snapshot(),before);
+    }
     if(process.env.MQ_ADMIN_REVIEW_LIST){
       adminReview=await require('./admin_review_list_tests.cjs')({db,scalar,request,post,tokens,passwords,credentials,login,waitBlocked,route,data,serviceToken});
       assert.deepEqual(await snapshot(),before);
@@ -315,7 +331,7 @@ async function main(){
         dropOn:key=>{dropKey=key;},loss:process.env.MQ_BRANCH_LOSS});
       assert.deepEqual(await snapshot(),before);
     }
-    console.log(JSON.stringify({catalog:'passed',http:true,postgres:await scalar('show server_version'),migrationRollback:true,restrictedRoles:true,stockAndMoneyUnchanged:true,publicationBlocked:true,privateImages:true,authorizationRaces:checks,replyLoss:loss||'none',decisionLoss:loss||'none',decisionRace:true,queuePagination:{pages,listed:listed.size},branchPermissions,merchantList,history,adminReview}));
+    console.log(JSON.stringify({catalog:'passed',http:true,postgres:await scalar('show server_version'),migrationRollback:true,restrictedRoles:true,stockAndMoneyUnchanged:true,publicationBlocked:true,privateImages:true,authorizationRaces:checks,replyLoss:loss||'none',decisionLoss:loss||'none',decisionRace:true,queuePagination:{pages,listed:listed.size},branchPermissions,merchantList,history,adminReview,catalogOptions}));
     completed=true;
   }finally{
     await db.query('rollback').catch(()=>{});

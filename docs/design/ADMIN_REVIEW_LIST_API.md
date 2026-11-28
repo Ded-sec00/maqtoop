@@ -16,6 +16,8 @@ GET /v1/admin/catalog/submissions يبقى افتراضيًاpending_review، و
 
 ## المعاملات
 
+مصادر المرشحات من [عقد الخيارات](CATALOG_OPTIONS_API.md): GET /v1/admin/catalog/merchants ثم /v1/admin/catalog/merchants/{merchantId}/branches. تعطي معرفات الأعمال الصحيحة دون استنتاجها من accountId أو الاقتصار على صفوف المسودات المحملة. عند تغيير التاجر تمسح الواجهة الفرع والمؤشر السابقين.
+
 Bearer مدير صالح إلزامي. جميع المعاملات اختيارية، ولا جسمGET أو مفتاح تكرار مطلوب:
 
 | المعامل | القاعدة |
