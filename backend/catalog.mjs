@@ -4,6 +4,7 @@ import { readPrivateImage } from './catalog-media.mjs';
 import { readMerchantListQuery, encodeMerchantListCursor } from './catalog-list.mjs';
 import { readCatalogHistoryQuery } from './catalog-history.mjs';
 import { readReviewListQuery } from './catalog-review-list.mjs';
+import { catalogOptionsRoute, readCatalogOptionsQuery } from './catalog-options.mjs';
 const hash=x=>createHash('sha256').update(x).digest('hex');
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 const invalid=()=>new AuthError(400,'INVALID_INPUT','بيانات الطلب غير صحيحة');
@@ -13,6 +14,7 @@ function canonical(x){
   return JSON.stringify(x);
 }
 function routeFor(method,path){
+  const options=catalogOptionsRoute(method,path);if(options)return options;
   const history=path.match(/^\/v1\/(merchant|admin)\/catalog\/submissions\/([^/]+)\/(revisions|compare)(?:\/([^/]+))?$/);
   if(history&&method==='GET'&&!(history[3]==='compare'&&history[4]))
     return {history:true,op:(history[1]==='admin'?'review/':'')+'history/'+(history[3]==='compare'?'compare':history[4]?'get':'list'),id:history[2],revision:history[4]};
@@ -43,7 +45,7 @@ export function createCatalog({gateway,actorPool,configuredLogins,testHooks}){
     const url=new URL(request.url,'http://localhost');
     const route=routeFor(request.method,url.pathname);if(!route)return null;
     let cursor;
-    if(url.search&&!['draft/list','review/list'].includes(route.op)&&!route.history){
+    if(url.search&&!['draft/list','review/list'].includes(route.op)&&!route.history&&!route.options){
       cursor=url.searchParams.get('cursor');
       if(!['review/list','access/list'].includes(route.op)||[...url.searchParams.keys()].some(k=>k!=='cursor')||url.searchParams.getAll('cursor').length!==1||!(route.op==='access/list'?/^[1-9][0-9]{0,18}$/:uuid).test(cursor||''))throw invalid();
     }
@@ -58,6 +60,7 @@ export function createCatalog({gateway,actorPool,configuredLogins,testHooks}){
     const list=route.op==='draft/list'?readMerchantListQuery(url.searchParams,login):null;
     const history=route.history?readCatalogHistoryQuery(url.searchParams,route.op,route.revision):null;
     const review=route.op==='review/list'?readReviewListQuery(url.searchParams):null;
+    const options=route.options?readCatalogOptionsQuery(url.searchParams,route.merchantId):null;
     const write=['POST','PATCH'].includes(request.method);const key=request.headers['idempotency-key'];
     if(write&&(typeof key!=='string'||!/^[A-Za-z0-9:._-]{1,200}$/.test(key)))throw new AuthError(400,'INVALID_IDEMPOTENCY_KEY','مفتاح الطلب مطلوب');
     let body={};let bytes=null;
@@ -75,7 +78,7 @@ export function createCatalog({gateway,actorPool,configuredLogins,testHooks}){
       }else if(raw.length)throw invalid();
     }
     if(route.accountId&&['accountId','branchId'].some(k=>Object.hasOwn(body,k)))throw invalid();
-    const data={...body,...list?.data,...history,...review,...(route.id?{id:route.id}:{}),...(route.accountId?{accountId:route.accountId}:{}),...(route.branchId?{branchId:route.branchId}:{}),...(cursor?{cursor}:{})};
+    const data={...body,...list?.data,...history,...review,...options,...(route.id?{id:route.id}:{}),...(route.accountId?{accountId:route.accountId}:{}),...(route.branchId?{branchId:route.branchId}:{}),...(cursor?{cursor}:{})};
     const client=await actorPool(login).connect();let transaction=false;
     try{
       await client.query('begin');transaction=true;let result;
@@ -83,7 +86,7 @@ export function createCatalog({gateway,actorPool,configuredLogins,testHooks}){
         const fingerprint=hash(canonical(data)+(bytes?'|'+hash(bytes):''));
         result=(await client.query(route.accountId?'select * from purchase_api.branch_access_write($1,$2::jsonb,$3,$4,$5)':'select * from purchase_api.catalog_write($1,$2::jsonb,$3,$4,$5,$6)',[route.op,JSON.stringify(data),token,key,fingerprint,...(route.accountId?[]:[bytes])])).rows[0];
       }else{
-        result={status:200,body:(await client.query(list||review?'select purchase_api.'+(review?'catalog_review_list':'merchant_catalog_list')+'($1::jsonb,$2) as body':'select purchase_api.'+(route.history?'catalog_history':route.accountId?'branch_access_read':'catalog_read')+'($1,$2::jsonb,$3) as body',list||review?[JSON.stringify(data),token]:[route.op,JSON.stringify(data),token])).rows[0].body};
+        result={status:200,body:(await client.query(list||review?'select purchase_api.'+(review?'catalog_review_list':'merchant_catalog_list')+'($1::jsonb,$2) as body':'select purchase_api.'+(route.options?'catalog_options':route.history?'catalog_history':route.accountId?'branch_access_read':'catalog_read')+'($1,$2::jsonb,$3) as body',list||review?[JSON.stringify(data),token]:[route.op,JSON.stringify(data),token])).rows[0].body};
         if(list)result.body=encodeMerchantListCursor(result.body,list.scope);
       }
       const context={op:'catalog/'+route.op,key,client,request,response};

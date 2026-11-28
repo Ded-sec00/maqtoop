@@ -40,6 +40,8 @@ npm start --prefix backend
 
 ## مسودات الكتالوج — المرحلة A
 
+لمصادر خيارات الفروع والتجار ثبت catalog_options.sql بعد admin_review_list.sql، وامنح LOGIN التاجر والإدارة EXECUTE على purchase_api.catalog_options(text,jsonb,text) فقط. يقرأ التاجر GET /v1/merchant/catalog/branches؛ وتقرأ الإدارة GET /v1/admin/catalog/merchants ثم /{merchantId}/branches. تدعم q/limit/cursor، والتسمية «الفرع {id}» مشتقة لعدم وجود اسم فرع في المخطط الحالي. [العقد والحدود](../docs/design/CATALOG_OPTIONS_API.md)، دون نشر أو بيع.
+
 لتوسيع قائمة مراجعة الإدارة ثبتadmin_review_list.sql بعدcatalog_history.sql، وامنحLOGIN الإدارة EXECUTE علىpurchase_api.catalog_review_list(jsonb,text). المسارGET /v1/admin/catalog/submissions يدعمq/merchantId/branchId/state/limit/cursor معإعادة فحصالجلسة بعدأقفال التصفية والمؤشر. يبقى الافتراضيpending_review وحد100 ومؤشرUUID القديم. [العقد](../docs/design/ADMIN_REVIEW_LIST_API.md)، دوننشر أوبيع.
 
 لسجل النسخ والمقارنة ثبت catalog_history.sql بعد merchant_draft_list.sql، وامنح LOGIN التاجر والإدارة EXECUTE على purchase_api.catalog_history(text,jsonb,text) فقط. GET .../revisions و.../revisions/{revision} و.../compare?from=1&to=2 محمية بالمالك والفرع والجلسة الحالية بعد الانتظار. [العقد](../docs/design/CATALOG_HISTORY_API.md)؛ لا تغيير لقفل النشر والبيع.
