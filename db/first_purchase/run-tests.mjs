@@ -5,10 +5,11 @@ import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const cases = [
+  {name:'catalog-history-http',script:'catalog_drafts.cjs',env:{MQ_CATALOG_HISTORY:'1'}},
   {name:'merchant-drafts-list-http',script:'catalog_drafts.cjs',env:{MQ_MERCHANT_LIST:'1'}},
   {name:'branch-permissions-http',script:'catalog_drafts.cjs',env:{MQ_BRANCH_API:'1'}},
   {name:'branch-permissions-reply-before',script:'catalog_drafts.cjs',env:{MQ_BRANCH_API:'1',MQ_BRANCH_LOSS:'before'}},
@@ -113,22 +114,37 @@ try {
     // Prevent a shell's previous test choices or database settings from leaking into a case.
     const environment = Object.fromEntries(Object.entries(process.env).filter(
       ([key]) => !key.startsWith('MQ_') && !key.startsWith('PG')));
-    const result = spawnSync(process.execPath,[path.join(directory,test.script)], {
-      cwd:directory,
-      env:{
-        ...environment, ...test.env,
-        NODE_PATH:path.join(directory,'node_modules'),
-        PGHOST:'127.0.0.1', PGPORT:String(port), PGUSER:'maq_test',
-        PGPASSWORD:password, PGDATABASE:database, PGCLIENTENCODING:'UTF8',
-        PGOPTIONS:'-c statement_timeout=12000 -c idle_in_transaction_session_timeout=20000',
-      },
-      encoding:'utf8', timeout:60000,
+    // Keep draining embedded PostgreSQL's log pipes while the test runs.
+    // A synchronous child can fill those pipes during negative SQL tests and stall a backend.
+    const result = await new Promise(resolve=>{
+      let stdout='',stderr='',error;let outputBytes=0;
+      const child = spawn(process.execPath,[path.join(directory,test.script)], {
+        cwd:directory,
+        env:{
+          ...environment, ...test.env,
+          NODE_PATH:path.join(directory,'node_modules'),
+          PGHOST:'127.0.0.1', PGPORT:String(port), PGUSER:'maq_test',
+          PGPASSWORD:password, PGDATABASE:database, PGCLIENTENCODING:'UTF8',
+          PGOPTIONS:'-c statement_timeout=12000 -c idle_in_transaction_session_timeout=20000',
+        },
+        timeout:60000,
+      });
+      const capture=(stream,append)=>{
+        stream.setEncoding('utf8');stream.on('data',chunk=>{
+          outputBytes+=Buffer.byteLength(chunk);
+          if(outputBytes>1024*1024){error??=new Error('Test output exceeded 1 MiB');child.kill();return;}
+          append(chunk);
+        });
+      };
+      capture(child.stdout,chunk=>{stdout+=chunk;});capture(child.stderr,chunk=>{stderr+=chunk;});
+      child.once('error',failure=>{error=failure;});
+      child.once('close',(status,signal)=>resolve({status,stdout,stderr,error:error??(signal?new Error('Test process terminated: '+signal):undefined)}));
     });
     const evidence = (result.stdout || '').split(/\r?\n/).filter(line=>line.startsWith('{')).map(line=>JSON.parse(line));
-    const passed = result.status === 0 && evidence.length > 0;
+    const passed = !result.error && result.status === 0 && evidence.length > 0;
     report.results.push({ name:test.name, passed, evidence });
     console.log((passed ? 'PASS ' : 'FAIL ') + test.name);
-    if (!passed) throw new Error(result.error?.message || result.stderr || 'Missing test evidence');
+    if (!passed) throw new Error(result.error ? result.error.message+(result.stderr?'\n'+result.stderr:'') : result.stderr || 'Missing test evidence');
   }
 } catch(error) {
   report.error = error.message;
