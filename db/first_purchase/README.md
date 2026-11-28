@@ -1,5 +1,7 @@
 # تشغيل اختبارات أول مسار شراء
 
+تضيفadmin-review-list-http البحث والتصفية والصفحات للإدارة فقط، وإلغاء الجلسة أثناء انتظار أقفال التاجر/الفرع/المؤشر، واتساقاللقطة أثناء تعديلمتزامن؛ يصبح الإجمالي86حالة. تثبتadmin_review_list.sql بعدcatalog_history.sql. [العقد](../../docs/design/ADMIN_REVIEW_LIST_API.md) و[النتائج](../../docs/verification/ADMIN_REVIEW_LIST_HTTP.md).
+
 تضيف catalog-history-http سجل النسخ والمقارنة والعزل وسحب التفويض أثناء انتظار القفل، فيصبح الإجمالي85 حالة. تثبتcatalog_history.sql بعدmerchant_draft_list.sql. [العقد](../../docs/design/CATALOG_HISTORY_API.md) و[تقرير التحقق](../../docs/verification/CATALOG_HISTORY_HTTP.md).
 
 تضيف merchant-drafts-list-http قائمة المسودات والبحث والتصفية والصفحات والعزل داخل المنشأة وبين التجار، وسحب الفرع أثناء انتظار القراءة وإبطال الجلسة. يصبح الإجمالي84 حالة. تثبت merchant_draft_list.sql بعد branch_permissions.sql؛ [النتائج](../../docs/verification/MERCHANT_DRAFT_LIST_HTTP.md).
