@@ -40,6 +40,8 @@ npm start --prefix backend
 
 ## مسودات الكتالوج — المرحلة A
 
+لسجل النسخ والمقارنة ثبت catalog_history.sql بعد merchant_draft_list.sql، وامنح LOGIN التاجر والإدارة EXECUTE على purchase_api.catalog_history(text,jsonb,text) فقط. GET .../revisions و.../revisions/{revision} و.../compare?from=1&to=2 محمية بالمالك والفرع والجلسة الحالية بعد الانتظار. [العقد](../docs/design/CATALOG_HISTORY_API.md)؛ لا تغيير لقفل النشر والبيع.
+
 لقائمة مسودات التاجر ثبت merchant_draft_list.sql بعد branch_permissions.sql، وامنح LOGIN التاجر EXECUTE على purchase_api.merchant_catalog_list(jsonb,text). GET /v1/merchant/catalog/submissions يقبل q/state/branchId/limit/cursor فقط، ولا يقرأ سوى مسودات صاحب الجلسة في فروعه المخولة. [العقد](../docs/design/CATALOG_API.md) يوضح المؤشر وسحب التفويض أثناء الانتظار. لا يتغير قفل النشر والبيع.
 
 بعد catalog_drafts.sql أضف branch_permissions.sql لإدارة منح وسحب الفروع عبر HTTP بدل حذف صف التفويض. يحتاج LOGIN الإداري EXECUTE على branch_access_read(text,jsonb,text) وbranch_access_write(text,jsonb,text,text,text). لا تمنح صلاحيات جداول مباشرة. [عقد الفروع والترحيل والرجوع](../docs/design/BRANCH_PERMISSIONS_API.md) يوضح النسخ والتكرار وإعادة فحص الصلاحيات بعد الأقفال. يظل catalog.enabled هو مفتاح فتح هذه المسارات الخاصة، دون نشر أو بيع.

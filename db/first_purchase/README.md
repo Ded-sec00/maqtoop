@@ -1,5 +1,7 @@
 # تشغيل اختبارات أول مسار شراء
 
+تضيف catalog-history-http سجل النسخ والمقارنة والعزل وسحب التفويض أثناء انتظار القفل، فيصبح الإجمالي85 حالة. تثبتcatalog_history.sql بعدmerchant_draft_list.sql. [العقد](../../docs/design/CATALOG_HISTORY_API.md) و[تقرير التحقق](../../docs/verification/CATALOG_HISTORY_HTTP.md).
+
 تضيف merchant-drafts-list-http قائمة المسودات والبحث والتصفية والصفحات والعزل داخل المنشأة وبين التجار، وسحب الفرع أثناء انتظار القراءة وإبطال الجلسة. يصبح الإجمالي84 حالة. تثبت merchant_draft_list.sql بعد branch_permissions.sql؛ [النتائج](../../docs/verification/MERCHANT_DRAFT_LIST_HTTP.md).
 
 تشمل المجموعة ثلاث حالات branch-permissions-http وbranch-permissions-reply-before وbranch-permissions-reply-after. تثبت branch_permissions.sql بعد catalog_drafts.sql، وتدير المنح والسحب عبر HTTP. تثبت رفض المسودة والصورة بعد سحب الفرع أثناء انتظار الأقفال، وتختبر التكرار وسباق النسخة القديمة وإلغاء جلسة الإدارة وفقد الرد. [العقد](../../docs/design/BRANCH_PERMISSIONS_API.md) و[تقرير التحقق](../../docs/verification/BRANCH_PERMISSIONS_HTTP.md).
@@ -12,7 +14,7 @@ npm ci --prefix db/first_purchase
 npm test --prefix db/first_purchase
 ```
 
-يشغّل الأمر محرك PostgreSQL 16.16 محمولًا على منفذ loopback متاح، ويهيئ cluster مستقلًا بترميز UTF-8 وكلمة مرور عشوائية لكل تشغيل. لكل حالة قاعدة جديدة باسم maqtoop_test_*، وتُمسح متغيرات MQ_ وPG الموروثة من بيئة كل عملية اختبار. مهلة كل عملية 60 ثانية، وأي فشل يوقف الحزمة برمز خروج غير صفري.
+يشغّل الأمر محرك PostgreSQL 16.16 محمولًا على منفذ loopback متاح، ويهيئ cluster مستقلًا بترميز UTF-8 وكلمة مرور عشوائية لكل تشغيل. لكل حالة قاعدة جديدة باسم maqtoop_test_*، وتُمسح متغيرات MQ_ وPG الموروثة من بيئة كل عملية اختبار. مهلة كل عملية60ثانية وحد خرج1MiB، وأي فشل يوقف الحزمة برمز خروج غير صفري. تشغيل الطفل غير متزامن كي تبقى قنوات سجل PostgreSQL مقروءة أثناء حالاتSQL السلبية؛ لا تُخفض سجلات الأخطاء لإخفاء الفشل.
 
 النتائج الفعلية تحفظ في results.json، ويوقف المشغّل المحرك في النهاية. يحتفظ بمجلد البيانات التجريبية تحت مجلد Windows المؤقت، ويذكر مساره في التقرير لتسهيل التشخيص. البيانات كلها مصطنعة.
 

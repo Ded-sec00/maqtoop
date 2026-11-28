@@ -40,6 +40,8 @@ brand/model/color/suggestedTitle نصوص غير فارغة حتى200 حرف، �
 
 ## مسارات التاجر والإدارة
 
+امتداد سجل النسخ: [CATALOG_HISTORY_API](CATALOG_HISTORY_API.md) يضيف قائمة النسخ وقراءة نسخة والمقارنة للإدارة وصاحب المسودة المخول فقط. تثبتcatalog_history.sql بعدmerchant_draft_list.sql؛ لا نشر أو كتابة تاريخية.
+
 | الطلب | المدخلات/النتيجة |
 |---|---|
 | GET /v1/merchant/catalog/submissions | قائمة مسودات صاحب الحساب من فروعه المخولة، ببحث وتصفية وصفحات؛ التفاصيل أدناه |

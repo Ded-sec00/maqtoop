@@ -7,7 +7,7 @@ const hash=x=>createHash('sha256').update(x).digest('hex');
 async function main(){
   assert.match(process.env.PGDATABASE||'',/^maqtoop_test_/);
   const db=new Client();const roles=[];const credentials={};const tokens={};const passwords={};let api;
-  const prefix='cat_'+randomBytes(5).toString('hex');
+  const prefix='cat_'+randomBytes(5).toString('hex');let completed=false;
   const scalar=async(sql,args)=>Object.values((await db.query(sql,args)).rows[0])[0];
   const snapshot=async()=>{
     const out={};
@@ -61,6 +61,14 @@ async function main(){
     assert.deepEqual((await db.query('select * from purchase_api.principal_branch order by login,branch_id')).rows,priorGrants);
     await db.query(listMigration);
     assert.deepEqual(await snapshot(),before);
+    const historyMigration=fs.readFileSync(path.join(__dirname,'catalog_history.sql'),'utf8');
+    await assert.rejects(db.query(historyMigration.replace(/commit;\s*$/i,'select 1/0; commit;')),e=>e.code==='22012');
+    await db.query('rollback');
+    assert.equal(await scalar("select to_regprocedure('purchase_api.catalog_history(text,jsonb,text)') is null"),true);
+    assert.equal(await scalar("select to_regprocedure('catalog.revision_json(uuid,integer,boolean)') is null"),true);
+    assert.deepEqual(await snapshot(),before);
+    await db.query(historyMigration);
+    assert.deepEqual(await snapshot(),before);
     const {hashPassword}=await import('../../backend/auth.mjs');
     for(const [label,actor,merchant,customer]of [['gateway',null,null,null],['admin','admin',null,null],['adminpeer','admin',null,null],['merchant','merchant',1,null],['coworker','merchant',1,null],['other','merchant',2,null],['customer','customer',null,1],['courier','courier',null,null],['service','service',null,null]]){
       const login=prefix+'_'+label;const password=randomBytes(24).toString('base64url');
@@ -72,7 +80,7 @@ async function main(){
         continue;
       }
       await db.query('insert into purchase_api.principal(login,actor,merchant_id,customer_id) values($1,$2,$3,$4)',[login,actor,merchant,customer]);
-      for(const fn of ['account_read(text,jsonb,text)','account_write(text,jsonb,text)','account_credentials(text)','catalog_read(text,jsonb,text)','catalog_write(text,jsonb,text,text,text,bytea)','branch_access_read(text,jsonb,text)','branch_access_write(text,jsonb,text,text,text)','merchant_catalog_list(jsonb,text)'])
+      for(const fn of ['account_read(text,jsonb,text)','account_write(text,jsonb,text)','account_credentials(text)','catalog_read(text,jsonb,text)','catalog_write(text,jsonb,text,text,text,bytea)','branch_access_read(text,jsonb,text)','branch_access_write(text,jsonb,text,text,text)','merchant_catalog_list(jsonb,text)','catalog_history(text,jsonb,text)'])
         await db.query(`grant execute on function purchase_api.${fn} to "${login}"`);
       if(actor!=='service'){
         passwords[label]=randomBytes(24).toString('base64url');
@@ -120,6 +128,10 @@ async function main(){
     const pair=await Promise.all([1,2].map(()=>post(route,data,tokens.merchant,'same-create')));
     assert.equal(pair[0].status,201,JSON.stringify(pair[0]));assert.deepEqual(pair[1],pair[0]);
     const id=pair[0].body.id;
+    if(process.env.MQ_CATALOG_HISTORY){
+      const historyProbe=await request('GET',route+'/'+id+'/revisions',tokens.merchant);
+      assert.equal(historyProbe.status,200,JSON.stringify(historyProbe));
+    }
     assert.equal(await scalar('select count(*)::int from catalog.submission'),1);
     assert.equal((await post(route,{...data,model:'Other'},tokens.merchant,'same-create')).status,409);
     assert.equal((await request('GET',route+'/'+id,tokens.other)).status,403);
@@ -268,6 +280,12 @@ async function main(){
     assert.ok(await scalar('select count(*)::int from catalog.audit_event')>0);
     let branchPermissions;
     let merchantList;
+    let history;
+    if(process.env.MQ_CATALOG_HISTORY){
+      history=await require('./catalog_history_tests.cjs')({db,scalar,request,post,tokens,credentials,login,waitBlocked,route,data,png,serviceToken,
+        pauseOn:key=>{pauseKey=key;const ready=new Promise(resolve=>{reachedHook=c=>resolve(c.client.processID);});return {ready,release:()=>{pauseKey=null;releaseHook();}};}}).catch(error=>{console.error(error);throw error;});
+      assert.deepEqual(await snapshot(),before);
+    }
     if(process.env.MQ_MERCHANT_LIST){
       merchantList=await require('./merchant_draft_list_tests.cjs')({db,scalar,request,post,tokens,credentials,login,waitBlocked,route,data,serviceToken,
         pauseOn:key=>{pauseKey=key;const ready=new Promise(resolve=>{reachedHook=c=>resolve(c.client.processID);});return {ready,release:()=>{pauseKey=null;releaseHook();}};}});
@@ -279,9 +297,11 @@ async function main(){
         dropOn:key=>{dropKey=key;},loss:process.env.MQ_BRANCH_LOSS});
       assert.deepEqual(await snapshot(),before);
     }
-    console.log(JSON.stringify({catalog:'passed',http:true,postgres:await scalar('show server_version'),migrationRollback:true,restrictedRoles:true,stockAndMoneyUnchanged:true,publicationBlocked:true,privateImages:true,authorizationRaces:checks,replyLoss:loss||'none',decisionLoss:loss||'none',decisionRace:true,queuePagination:{pages,listed:listed.size},branchPermissions,merchantList}));
+    console.log(JSON.stringify({catalog:'passed',http:true,postgres:await scalar('show server_version'),migrationRollback:true,restrictedRoles:true,stockAndMoneyUnchanged:true,publicationBlocked:true,privateImages:true,authorizationRaces:checks,replyLoss:loss||'none',decisionLoss:loss||'none',decisionRace:true,queuePagination:{pages,listed:listed.size},branchPermissions,merchantList,history}));
+    completed=true;
   }finally{
     await db.query('rollback').catch(()=>{});
+    if(process.env.MQ_CATALOG_HISTORY&&!completed)await db.query('select pg_terminate_backend(pid) from pg_stat_activity where datname=current_database() and usename::text=any($1::text[]) and pid<>pg_backend_pid()',[roles]).catch(()=>{});
     releaseHook?.();if(api)await api.close();
     for(const role of roles.reverse()){await db.query(`drop owned by "${role}"`).catch(()=>{});await db.query(`drop role "${role}"`).catch(()=>{});}
     await db.end();
