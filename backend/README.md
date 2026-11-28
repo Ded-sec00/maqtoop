@@ -40,6 +40,8 @@ npm start --prefix backend
 
 ## مسودات الكتالوج — المرحلة A
 
+لتوسيع قائمة مراجعة الإدارة ثبتadmin_review_list.sql بعدcatalog_history.sql، وامنحLOGIN الإدارة EXECUTE علىpurchase_api.catalog_review_list(jsonb,text). المسارGET /v1/admin/catalog/submissions يدعمq/merchantId/branchId/state/limit/cursor معإعادة فحصالجلسة بعدأقفال التصفية والمؤشر. يبقى الافتراضيpending_review وحد100 ومؤشرUUID القديم. [العقد](../docs/design/ADMIN_REVIEW_LIST_API.md)، دوننشر أوبيع.
+
 لسجل النسخ والمقارنة ثبت catalog_history.sql بعد merchant_draft_list.sql، وامنح LOGIN التاجر والإدارة EXECUTE على purchase_api.catalog_history(text,jsonb,text) فقط. GET .../revisions و.../revisions/{revision} و.../compare?from=1&to=2 محمية بالمالك والفرع والجلسة الحالية بعد الانتظار. [العقد](../docs/design/CATALOG_HISTORY_API.md)؛ لا تغيير لقفل النشر والبيع.
 
 لقائمة مسودات التاجر ثبت merchant_draft_list.sql بعد branch_permissions.sql، وامنح LOGIN التاجر EXECUTE على purchase_api.merchant_catalog_list(jsonb,text). GET /v1/merchant/catalog/submissions يقبل q/state/branchId/limit/cursor فقط، ولا يقرأ سوى مسودات صاحب الجلسة في فروعه المخولة. [العقد](../docs/design/CATALOG_API.md) يوضح المؤشر وسحب التفويض أثناء الانتظار. لا يتغير قفل النشر والبيع.

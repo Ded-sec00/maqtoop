@@ -49,14 +49,14 @@ brand/model/color/suggestedTitle نصوص غير فارغة حتى200 حرف، �
 | PATCH /v1/merchant/catalog/submissions/{id} | محتوى المسودة الكامل مع expectedVersion؛ ينشئ revision جديدة. لا ينقل الفرع |
 | POST .../{id}/submit | expectedVersion فقط؛ draft→pending_review |
 | POST .../{id}/withdraw | expectedVersion فقط؛ pending_review→withdrawn |
-| GET /v1/admin/catalog/submissions | قائمة pending_review الداخلية، حد100 سجل لكل صفحة؛ nextCursor/hasMore للصفحة التالية عبر ?cursor=UUID. لا تقرر نشرًا |
+| GET /v1/admin/catalog/submissions | قائمة إدارية موسعة: الافتراضيpending_review وحد100، معq/merchantId/branchId/state/limit وcursor UUID؛ [العقد](ADMIN_REVIEW_LIST_API.md). لا تقرر نشرًا |
 | GET /v1/admin/catalog/submissions/{id} | قراءة خاصة للإدارة |
 | POST /v1/admin/catalog/submissions/{id}/decision | decision وreason وexpectedVersion وexpectedRevision |
 | GET /v1/catalog/handsets | للعميل الموثق فقط؛ items=[] وpublicationEnabled=false |
 
 decision يقبل request_changes أوreject بسبب غير فارغ حتى2000 حرف. approve يعيد409/CATALOG_POLICY_NOT_CONFIGURED، ولا يحفظ قرارًا أو حالة approved أو مخزونًا. draft/update متاح في draft/changes_requested/withdrawn وينقل الحالة إلىdraft. لا تعديل لنسخة معلقة، ولا إعادة كتابة قرار تاريخي، ولا إعادة فتح rejected إلا بطلب جديد.
 
-ترتيب قائمة المراجعة created_at ثمid، ويستمر المؤشر من آخر سجل في الصفحة، حتى لو راجعه المدير قبل طلب الصفحة التالية. يمكن قراءة تاريخ أي مسودة بمعرفها عبر مسار تفاصيل الإدارة. معاملات الاستعلام الأخرى أو مؤشر غير صالح مرفوضة؛ لا تفتح هذه الإضافة query parameters لبقية مسارات الشراء والحسابات.
+ترتيب قائمة المراجعة created_at ثمid، ويستمر المؤشر من آخر سجل في الصفحة، حتى لو راجعه المدير قبل طلب الصفحة التالية. يدعم امتداد28نوفمبر معاملاتالبحث والتصفية الموثقة فيعقدالإدارة فقط، وتبقىالمعاملات الأخرى أوالمؤشر غيرالصحيح مرفوضة؛ لا يفتح ذلكquery parameters لبقية مساراتالشراء والحسابات. تفاصيل المسودة وتاريخها ومقارنتها منمساراتالإدارة القائمة.
 
 submit لا يتطلب حسم سعر العميل أو ضمان الشركة؛ الاستجابة تذكر missingDependencies بقيم sale_price_policy وwarranty_policy. يجوز للمراجع طلب استكمال صور أو بيانات، لكن عدم رد الشركة ليس قبولًا تجاريًا ولا خطأ ينسب للتاجر.
 

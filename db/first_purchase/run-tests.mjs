@@ -9,6 +9,7 @@ import { spawn } from 'node:child_process';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const cases = [
+  {name:'admin-review-list-http',script:'catalog_drafts.cjs',env:{MQ_ADMIN_REVIEW_LIST:'1'}},
   {name:'catalog-history-http',script:'catalog_drafts.cjs',env:{MQ_CATALOG_HISTORY:'1'}},
   {name:'merchant-drafts-list-http',script:'catalog_drafts.cjs',env:{MQ_MERCHANT_LIST:'1'}},
   {name:'branch-permissions-http',script:'catalog_drafts.cjs',env:{MQ_BRANCH_API:'1'}},

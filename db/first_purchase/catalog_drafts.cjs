@@ -69,6 +69,15 @@ async function main(){
     assert.deepEqual(await snapshot(),before);
     await db.query(historyMigration);
     assert.deepEqual(await snapshot(),before);
+    const reviewMigration=fs.readFileSync(path.join(__dirname,'admin_review_list.sql'),'utf8');
+    await assert.rejects(db.query(reviewMigration.replace(/commit;\s*$/i,'select 1/0; commit;')),e=>e.code==='22012');
+    await db.query('rollback');
+    assert.equal(await scalar("select to_regprocedure('purchase_api.catalog_review_list(jsonb,text)') is null"),true);
+    assert.equal(await scalar("select to_regprocedure('catalog.review_submission_json(uuid)') is null"),true);
+    assert.equal(await scalar("select to_regclass('catalog.review_list_order') is null"),true);
+    assert.deepEqual(await snapshot(),before);
+    await db.query(reviewMigration);
+    assert.deepEqual(await snapshot(),before);
     const {hashPassword}=await import('../../backend/auth.mjs');
     for(const [label,actor,merchant,customer]of [['gateway',null,null,null],['admin','admin',null,null],['adminpeer','admin',null,null],['merchant','merchant',1,null],['coworker','merchant',1,null],['other','merchant',2,null],['customer','customer',null,1],['courier','courier',null,null],['service','service',null,null]]){
       const login=prefix+'_'+label;const password=randomBytes(24).toString('base64url');
@@ -80,7 +89,7 @@ async function main(){
         continue;
       }
       await db.query('insert into purchase_api.principal(login,actor,merchant_id,customer_id) values($1,$2,$3,$4)',[login,actor,merchant,customer]);
-      for(const fn of ['account_read(text,jsonb,text)','account_write(text,jsonb,text)','account_credentials(text)','catalog_read(text,jsonb,text)','catalog_write(text,jsonb,text,text,text,bytea)','branch_access_read(text,jsonb,text)','branch_access_write(text,jsonb,text,text,text)','merchant_catalog_list(jsonb,text)','catalog_history(text,jsonb,text)'])
+      for(const fn of ['account_read(text,jsonb,text)','account_write(text,jsonb,text)','account_credentials(text)','catalog_read(text,jsonb,text)','catalog_write(text,jsonb,text,text,text,bytea)','branch_access_read(text,jsonb,text)','branch_access_write(text,jsonb,text,text,text)','merchant_catalog_list(jsonb,text)','catalog_history(text,jsonb,text)','catalog_review_list(jsonb,text)'])
         await db.query(`grant execute on function purchase_api.${fn} to "${login}"`);
       if(actor!=='service'){
         passwords[label]=randomBytes(24).toString('base64url');
@@ -107,6 +116,10 @@ async function main(){
       assert.equal(r.status,200,JSON.stringify(r));tokens[label]=r.body.accessToken;return tokens[label];
     };
     for(const label of ['admin','adminpeer','merchant','coworker','other','customer','courier'])await login(label);
+    if(process.env.MQ_ADMIN_REVIEW_LIST){
+      const reviewProbe=await request('GET','/v1/admin/catalog/submissions?q=ReviewPhone',tokens.admin);
+      assert.equal(reviewProbe.status,200,JSON.stringify(reviewProbe));
+    }
     if(process.env.MQ_MERCHANT_LIST){
       const probe=await request('GET','/v1/merchant/catalog/submissions',tokens.merchant);
       assert.equal(probe.status,200,JSON.stringify(probe));
@@ -281,6 +294,11 @@ async function main(){
     let branchPermissions;
     let merchantList;
     let history;
+    let adminReview;
+    if(process.env.MQ_ADMIN_REVIEW_LIST){
+      adminReview=await require('./admin_review_list_tests.cjs')({db,scalar,request,post,tokens,passwords,credentials,login,waitBlocked,route,data,serviceToken});
+      assert.deepEqual(await snapshot(),before);
+    }
     if(process.env.MQ_CATALOG_HISTORY){
       history=await require('./catalog_history_tests.cjs')({db,scalar,request,post,tokens,credentials,login,waitBlocked,route,data,png,serviceToken,
         pauseOn:key=>{pauseKey=key;const ready=new Promise(resolve=>{reachedHook=c=>resolve(c.client.processID);});return {ready,release:()=>{pauseKey=null;releaseHook();}};}}).catch(error=>{console.error(error);throw error;});
@@ -297,7 +315,7 @@ async function main(){
         dropOn:key=>{dropKey=key;},loss:process.env.MQ_BRANCH_LOSS});
       assert.deepEqual(await snapshot(),before);
     }
-    console.log(JSON.stringify({catalog:'passed',http:true,postgres:await scalar('show server_version'),migrationRollback:true,restrictedRoles:true,stockAndMoneyUnchanged:true,publicationBlocked:true,privateImages:true,authorizationRaces:checks,replyLoss:loss||'none',decisionLoss:loss||'none',decisionRace:true,queuePagination:{pages,listed:listed.size},branchPermissions,merchantList,history}));
+    console.log(JSON.stringify({catalog:'passed',http:true,postgres:await scalar('show server_version'),migrationRollback:true,restrictedRoles:true,stockAndMoneyUnchanged:true,publicationBlocked:true,privateImages:true,authorizationRaces:checks,replyLoss:loss||'none',decisionLoss:loss||'none',decisionRace:true,queuePagination:{pages,listed:listed.size},branchPermissions,merchantList,history,adminReview}));
     completed=true;
   }finally{
     await db.query('rollback').catch(()=>{});
